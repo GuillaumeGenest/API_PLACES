@@ -8,7 +8,7 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
     raise Exception("La clé API Google Places n'est pas configurée")
 
-city_name = 'Chenonceau'
+city_name = 'Venise'
 
 
 
@@ -119,7 +119,7 @@ def get_tourist_attractions_nearby(lat, lng, radius=5000):
     data = response.json()
     
     if data['status'] == 'OK':
-        attractions = data['results'][:1]
+        attractions = data['results'][:20]
         #print(json.dumps(data, indent=2))
         results = []
         for attraction in attractions:
@@ -173,7 +173,7 @@ def get_place_details(place_id):
     dict : Un dictionnaire contenant les informations du lieu, ou None en cas d'erreur.
     """
     # Endpoint de l'API Google Place Details
-    url = f"https://maps.googleapis.com/maps/api/place/details/json?place_id={place_id}&key={GOOGLE_API_KEY}"
+    url = f"https://maps.googleapis.com/maps/api/place/details/json?place_id={place_id}&key={GOOGLE_API_KEY}&language=fr"
     
     try:
         # Faites la requête à l'API
@@ -193,6 +193,7 @@ def get_place_details(place_id):
                 "phone": data.get("formatted_phone_number"),
                 "website": data.get("website"),
                 "opening_hours": data["opening_hours"]["weekday_text"] if "opening_hours" in data else None,
+                "description": data.get("editorial_summary", {}).get("overview", "Aucune description disponible"),
                 # Construire l'URL de chaque photo
                  "photos": [
                      f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference={photo_data['photo_reference']}&key={GOOGLE_API_KEY}"
@@ -250,7 +251,7 @@ else:
     print("Aucune attraction trouvée.")
 
 
-place_id = "ChIJoaig2dWw_EcRARD_ye9ZEiY"
+place_id = "ChIJv2xSZNexfkcRBaKsgyfVEgo"
 
 
 print("\n" + "="*50)
@@ -262,9 +263,20 @@ if place_details:
     print(f"Adresse : {place_details['address']}")
     print(f"Téléphone : {place_details['phone']}")
     print(f"Site web : {place_details['website']}")
+    print(f"Description : {place_details['description']}")
     print(f"Heures d'ouverture :")
-    for hour in place_details['opening_hours']:
-        print(hour)
+    print("HEURES D'OUVERTURE :")
+    if place_details['opening_hours']:
+        for hour in place_details['opening_hours']:
+            print(hour)
+    else:
+        print("Horaires non disponibles")
     print("URLs des photos :")
     for photo_url in place_details["photos"]:
         print(photo_url)
+
+        """
+        Rajouter filtre et filtrer en fonction du user_ratings_total 
+        Mettre sous forme de fonction 
+        Placer cela comme une API 
+        """
