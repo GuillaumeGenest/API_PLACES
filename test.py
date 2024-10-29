@@ -1,11 +1,14 @@
 import requests
 import os
+import json
+
+
 # Récupérer la clé API de Google Places depuis les variables d'environnement
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
     raise Exception("La clé API Google Places n'est pas configurée")
 
-city_name = 'Paris'
+city_name = 'Chenonceau'
 
 
 
@@ -107,16 +110,17 @@ def get_tourist_attractions_nearby(lat, lng, radius=5000):
         params={
             "location": f"{lat},{lng}",
             "radius": radius,
-            "rankby": "prominence",
+            "rankPreference": "POPULARITY",
             "type": "tourist_attraction",
-            #"fields": "name,vicinity,place_id,rating,photos,editorial_summary,website_uri,url",
             "key": GOOGLE_API_KEY,
             "language": "fr"  # Résultats en français
         }
     )
     data = response.json()
+    
     if data['status'] == 'OK':
-        attractions = data['results'][:10]
+        attractions = data['results'][:1]
+        #print(json.dumps(data, indent=2))
         results = []
         for attraction in attractions:
             # Extraction des informations principales
@@ -124,29 +128,18 @@ def get_tourist_attractions_nearby(lat, lng, radius=5000):
             address = attraction.get("vicinity", "Adresse non disponible")
             place_id = attraction.get("place_id", "ID non disponible")
             rating = attraction.get("rating", "Note non disponible")
-            website_uri = attraction.get("website_uri", "Site web non disponible")
-            google_maps_uri = attraction.get("url", "Lien Google Maps non disponible")
+            user_ratings_total = attraction.get("user_ratings_total", 0)
+            website = attraction.get("websiteUri", "Site web non disponible")
+            phone = attraction.get("formatted_phone_number", "Téléphone non disponible")
+            google_maps_url = attraction.get("googleMapsUri", "Lien Google Maps non disponible")
+
+
 
             # Récupération de la photo si disponible
             photo_url = None
             if "photos" in attraction:
                 photo_reference = attraction["photos"][0]["photo_reference"]
                 photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photo_reference}&key={GOOGLE_API_KEY}"
-
-            # Appel supplémentaire à Place Details pour obtenir la description
-           #details_response = requests.get(
-           #     "https://maps.googleapis.com/maps/api/place/details/json",
-           #     params={
-           #         "place_id": place_id,
-            #        "fields": "editorial_summary",
-            #        "key": GOOGLE_API_KEY,
-            #        "language": "fr"
-            #    }
-           # )
-           # details_data = details_response.json()
-            #description = details_data.get("result", {}).get("editorial_summary", {}).get("overview", "Description non disponible")
-
-            description = attraction.get("editorial_summary", {}).get("overview", "Description non disponible")
             
             results.append({
                 "name": name,
@@ -154,14 +147,67 @@ def get_tourist_attractions_nearby(lat, lng, radius=5000):
                 "place_id": place_id,
                 "rating": rating,
                 "photo_url": photo_url,
-                "description": description,
-                "website_uri": website_uri,
-                "google_maps_uri": google_maps_uri
+                "website": website,
+                "google_maps_url": google_maps_url,
+                "phone": phone,
+                "user_ratings_total": user_ratings_total
             })
         return results
     else:
         print("Aucun point d'intérêt trouvé ou une erreur est survenue.")
         return None
+
+
+
+
+
+def get_place_details(place_id):
+    """
+    Récupère les détails d'un lieu à partir de son ID Google Place.
+    
+    Paramètres :
+    place_id (str) : L'ID unique du lieu sur Google Place.
+    api_key (str) : Votre clé d'API Google.
+    
+    Retourne :
+    dict : Un dictionnaire contenant les informations du lieu, ou None en cas d'erreur.
+    """
+    # Endpoint de l'API Google Place Details
+    url = f"https://maps.googleapis.com/maps/api/place/details/json?place_id={place_id}&key={GOOGLE_API_KEY}"
+    
+    try:
+        # Faites la requête à l'API
+        response = requests.get(url)
+        
+        # Vérifiez que la requête a réussi
+        if response.status_code == 200:
+            # Récupérez les données du lieu
+            data = response.json()["result"]
+            
+            
+            
+            # Extrayez les informations dont vous avez besoin
+            place_info = {
+                "name": data.get("name"),
+                "address": data.get("formatted_address"),
+                "phone": data.get("formatted_phone_number"),
+                "website": data.get("website"),
+                "opening_hours": data["opening_hours"]["weekday_text"] if "opening_hours" in data else None,
+                # Construire l'URL de chaque photo
+                 "photos": [
+                     f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference={photo_data['photo_reference']}&key={GOOGLE_API_KEY}"
+                for photo_data in data["photos"]
+                ] if "photos" in data else []
+            }
+            
+            return place_info
+        else:
+            print(f"Erreur lors de la récupération des informations du lieu : {response.status_code}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur lors de la requête à l'API : {e}")
+        return None
+
 
 # Obtenir l'ID du lieu
 coordinates_direct = get_city_coordinates(city_name)
@@ -188,14 +234,37 @@ else:
 attractions = get_tourist_attractions_nearby(coordinates_from_place_id[0], coordinates_from_place_id[1])
 if attractions:
     for i, attraction in enumerate(attractions, start=1):
+        print("\n" + "="*50)
         print(f"Attraction {i}:")
         print(f"Nom : {attraction['name']}")
         print(f"Adresse : {attraction['address']}")
         print(f"ID : {attraction['place_id']}")
         print(f"Note : {attraction['rating']}\n")
         print(f"Photo URL : {attraction['photo_url']}")
-        print(f"Site web : {attraction['website_uri']}\n")
-        print(f"Google Maps : {attraction['google_maps_uri']}\n")
-        print(f"Description : {attraction['description']}\n")
+        print(f"Site web : {attraction['website']}")
+        print(f"Google Maps : {attraction['google_maps_url']}")
+        print(f"Phone : {attraction['phone']}")
+        print(f"user_ratings_total : {attraction['user_ratings_total']}")
+       #print(f"Description : {attraction['description']}\n")
 else:
     print("Aucune attraction trouvée.")
+
+
+place_id = "ChIJoaig2dWw_EcRARD_ye9ZEiY"
+
+
+print("\n" + "="*50)
+print("\n" + "="*50)
+print("\n" + "="*50)
+place_details = get_place_details(place_id)
+if place_details:
+    print(f"Nom : {place_details['name']}")
+    print(f"Adresse : {place_details['address']}")
+    print(f"Téléphone : {place_details['phone']}")
+    print(f"Site web : {place_details['website']}")
+    print(f"Heures d'ouverture :")
+    for hour in place_details['opening_hours']:
+        print(hour)
+    print("URLs des photos :")
+    for photo_url in place_details["photos"]:
+        print(photo_url)
