@@ -1,0 +1,31 @@
+# Environnement virtuel
+venv/
+.env
+
+# Fichiers Python compilés
+*.pyc
+*.pyo
+__pycache__/
+
+# Logs et base de données locales
+*.log
+*.sqlite3
+
+# Configurations d'environnement
+*.env
+
+# Dépendances
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Systèmes d'exploitation
+.DS_Store
+Thumbs.db
+
+# IDE (VSCode, PyCharm, etc.)
+.vscode/
+.idea/
+
