@@ -2,14 +2,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from API_Places import *
 
-
-import logging
-
-
-# Configuration du logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 app = FastAPI()
 
 @app.get("/attractions/{city_name}")
@@ -23,6 +15,15 @@ def get_attractions(city_name):
             raise HTTPException(status_code=404, detail="Aucune attraction trouvée")
     else:
         raise HTTPException(status_code=400, detail=f"Erreur dans les coordonnées de la ville {city_name}, cette dernière n'existe pas")
+    
+
+@app.get("/attractions_with_coordinates/{latitude}-{longitude}")
+def get_attractions_by_coordinates(latitude: float, longitude: float):
+    attractions = get_tourist_attractions_nearby(latitude, longitude)
+    if attractions:
+        return JSONResponse(content={"attractions": attractions})
+    else:
+        raise HTTPException(status_code=404, detail="Aucune attraction trouvée")
 
 @app.get("/attraction/{place_name}")
 def get_attraction_information(place_name):
@@ -48,4 +49,3 @@ def get_attraction_information_by_coordinates(latitude: float, longitude: float)
             raise HTTPException(status_code=404, detail="Aucune attraction trouvée")
     else:
         raise HTTPException(status_code=400, detail=f"Erreur dans les coordonnées de la ville {latitude} - {longitude}, cette dernière n'existe pas")
-    
