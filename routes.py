@@ -4,6 +4,12 @@ from API_Places import *
 
 app = FastAPI()
 
+#"""
+#    Requête pour Récupèrer et retourner les lieux avec leurs informations à partir d'un espace dont le centre est données par un nom
+#
+#"""
+
+
 @app.get("/attractions/{city_name}")
 def get_attractions(city_name):
     coordinates = get_city_coordinates(city_name)
@@ -16,6 +22,11 @@ def get_attractions(city_name):
     else:
         raise HTTPException(status_code=400, detail=f"Erreur dans les coordonnées de la ville {city_name}, cette dernière n'existe pas")
     
+#"""
+#    Requête pour Récupèrer et retourner les lieux avec leurs informations à partir d'un espace dont le centre correspond aux coordonnées
+#
+#"""
+
 
 @app.get("/attractions_with_coordinates/{latitude}-{longitude}")
 def get_attractions_by_coordinates(latitude: float, longitude: float):
@@ -24,6 +35,11 @@ def get_attractions_by_coordinates(latitude: float, longitude: float):
         return JSONResponse(content={"attractions": attractions})
     else:
         raise HTTPException(status_code=404, detail="Aucune attraction trouvée")
+    
+#"""
+#    Requête pour Récupèrer et retourner le lieu et ses informations à partir du nom
+#
+#"""
 
 @app.get("/attraction/{place_name}")
 def get_attraction_information(place_name):
@@ -37,6 +53,11 @@ def get_attraction_information(place_name):
     else:
         raise HTTPException(status_code=400, detail=f"Erreur dans les coordonnées de la ville {place_name}, cette dernière n'existe pas")
 
+#"""
+#    Requête pour Récupèrer et retourner le lieu et ses informations à partir des coordonnées
+#
+#"""
+
 @app.get("/attraction_with_coordinates/{latitude}-{longitude}")
 def get_attraction_information_by_coordinates(latitude: float, longitude: float):
     place_id = get_place_id_from_coordinates(latitude, longitude)
@@ -44,7 +65,7 @@ def get_attraction_information_by_coordinates(latitude: float, longitude: float)
     if place_id:
         attraction = get_tourist_attraction(place_id)
         if attraction:
-            return JSONResponse(content={"attractions": attraction})
+            return JSONResponse(content={"attraction": attraction})
         else:
             raise HTTPException(status_code=404, detail="Aucune attraction trouvée")
     else:
