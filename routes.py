@@ -9,12 +9,11 @@ app = FastAPI()
 #
 #"""
 
-
-@app.get("/attractions/{city_name}")
-def get_attractions(city_name):
+@app.get("/attractions/city={city_name}&category={category}")
+def get_attractions(city_name, category: AttractionCategory):
     coordinates = get_city_coordinates(city_name)
     if coordinates:
-        attractions = get_tourist_attractions_nearby(coordinates[0], coordinates[1])
+        attractions = get_tourist_attractions_nearby(coordinates[0], coordinates[1], category)
         if attractions:
             return JSONResponse(content={"attractions": attractions})
         else:
@@ -27,10 +26,9 @@ def get_attractions(city_name):
 #
 #"""
 
-
-@app.get("/attractions_with_coordinates/{latitude}-{longitude}")
-def get_attractions_by_coordinates(latitude: float, longitude: float):
-    attractions = get_tourist_attractions_nearby(latitude, longitude)
+@app.get("/attractions_with_coordinates/coordinates={latitude}-{longitude}&attractions={attraction}")
+def get_attractions_by_coordinates(latitude: float, longitude: float, attraction: AttractionCategory):
+    attractions = get_tourist_attractions_nearby(latitude, longitude, attraction)
     if attractions:
         return JSONResponse(content={"attractions": attractions})
     else:

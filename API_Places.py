@@ -2,6 +2,42 @@ import requests
 import os
 import json
 
+
+from enum import Enum
+from typing import List, Optional
+
+
+# Définition des catégories selon les spécifications exactes
+class AttractionCategory(str, Enum):
+    touristique = "touristique"
+    nature = "nature"
+    manger = "manger"
+
+    """
+    Retourne les types Google Places à inclure en fonction de la catégorie exacte demandée
+    """
+
+def get_included_types(category: AttractionCategory) -> List[str]:
+    category_types = {
+        AttractionCategory.touristique: [
+            #"point_of_interest",
+            #"museum",
+            "tourist_attraction"
+        ],
+        AttractionCategory.nature: [
+            "hiking_area",
+            "park",
+            "beach"
+        ],
+        AttractionCategory.manger: [
+            "restaurant",
+            "bar",
+            "amusement_park"
+        ]
+    }
+    return category_types[category]
+
+
 # Récupérer la clé API de Google Places depuis les variables d'environnement
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
@@ -103,8 +139,6 @@ def get_place_id_from_coordinates(lat, lng):
         return None
 
 
-
-
 #"""
 #    Recherche et Récupère les attractions touristiques dans un rayon de 5 km autour des coordonnées fournies.
 #    :param lat: Latitude du lieu.
@@ -112,7 +146,7 @@ def get_place_id_from_coordinates(lat, lng):
 #    :param radius: Rayon de recherche en mètres (par défaut 5000 m soit 5 km).
 #    :return: Liste des attractions touristiques avec leurs informations. (place_id, name, address, rating, photo_url, user_ratings_total)
 #"""
-def get_tourist_attractions_nearby(lat, lng, radius=5000):
+def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radius=5000):
     url = "https://places.googleapis.com/v1/places:searchNearby"
     
     # Demander tous les champs nécessaires dans le FieldMask
@@ -151,10 +185,7 @@ def get_tourist_attractions_nearby(lat, lng, radius=5000):
                 "radius": float(radius)
             }
         },
-        "includedTypes": [
-            "hiking_area",     
-            "tourist_attraction"
-            ]
+        "includedTypes": get_included_types(category)
     }
     
     
