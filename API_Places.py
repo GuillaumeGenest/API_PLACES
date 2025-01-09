@@ -11,7 +11,7 @@ from typing import List, Optional
 class AttractionCategory(str, Enum):
     touristique = "touristique"
     nature = "nature"
-    manger = "manger"
+    restaurant = "restaurant"
 
     """
     Retourne les types Google Places à inclure en fonction de la catégorie exacte demandée
@@ -29,7 +29,7 @@ def get_included_types(category: AttractionCategory) -> List[str]:
             "park",
             "beach"
         ],
-        AttractionCategory.manger: [
+        AttractionCategory.restaurant: [
             "restaurant",
             "bar",
             "amusement_park"
@@ -224,7 +224,7 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
                             photo_url = f"https://places.googleapis.com/v1/{photo_reference}/media?key={GOOGLE_API_KEY}&maxHeightPx=400&maxWidthPx=400"
                             attraction['photo_urls'].append(photo_url)
                 formatted_attractions.append(attraction)
-        return formatted_attractions
+        return {"attraction": formatted_attractions}
     except requests.exceptions.HTTPError as http_err:
         print(f"Erreur HTTP lors de la requête à l'API Places: {http_err}")
         return None
@@ -296,8 +296,7 @@ def get_tourist_attraction(place_id):
                         if photo_reference:
                             photo_url = f"https://places.googleapis.com/v1/{photo_reference}/media?key={GOOGLE_API_KEY}&maxHeightPx=400&maxWidthPx=400"
                             attraction['photo_urls'].append(photo_url)
-        formatted_attractions.append(attraction)
-        return formatted_attractions
+        return {"attraction": attraction}
         
     except requests.exceptions.RequestException as e:
         print(f"Erreur lors de la requête à l'API Places: {e}")

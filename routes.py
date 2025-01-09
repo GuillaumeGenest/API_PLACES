@@ -15,7 +15,7 @@ def get_attractions(city_name, category: AttractionCategory):
     if coordinates:
         attractions = get_tourist_attractions_nearby(coordinates[0], coordinates[1], category)
         if attractions:
-            return JSONResponse(content={"attractions": attractions})
+            return JSONResponse(content=attractions)
         else:
             raise HTTPException(status_code=404, detail="Aucune attraction trouvée")
     else:
@@ -30,7 +30,7 @@ def get_attractions(city_name, category: AttractionCategory):
 def get_attractions_by_coordinates(latitude: float, longitude: float, attraction: AttractionCategory):
     attractions = get_tourist_attractions_nearby(latitude, longitude, attraction)
     if attractions:
-        return JSONResponse(content={"attractions": attractions})
+        return JSONResponse(content=attractions)
     else:
         raise HTTPException(status_code=404, detail="Aucune attraction trouvée")
     
@@ -45,7 +45,7 @@ def get_attraction_information(place_name):
     if place_id:
         attraction = get_tourist_attraction(place_id)
         if attraction:
-            return JSONResponse(content={"attractions": attraction})
+            return JSONResponse(content=attraction)
         else:
             raise HTTPException(status_code=404, detail="Aucune attraction trouvée")
     else:
@@ -63,7 +63,7 @@ def get_attraction_information_by_coordinates(latitude: float, longitude: float)
     if place_id:
         attraction = get_tourist_attraction(place_id)
         if attraction:
-            return JSONResponse(content={"attraction": attraction})
+            return JSONResponse(content= attraction)
         else:
             raise HTTPException(status_code=404, detail="Aucune attraction trouvée")
     else:
