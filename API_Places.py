@@ -75,21 +75,26 @@ def get_city_coordinates(city_name):
 #"""
 #    Obtient l'ID d'un lieu à partir de son nom.
 #
-#   :param location: Nom du lieu (ex : "Grenoble").
+#   :param location: Nom du lieu (ex : "Grenoble") avec une adresse
 #    :param api_key: Clé API Google.
 #    :return: L'ID du lieu, ou None si aucune correspondance n'est trouvée.
 #"""
 
-def get_place_id(location):
+def get_place_id(name, address=None):
+    # Construire la requête en combinant le nom et l'adresse si disponible
+    query = name
+    if address:
+        query = f"{name}, {address}"
+    
+    # Paramètres de l
     response = requests.get(
         "https://maps.googleapis.com/maps/api/place/findplacefromtext/json",
         params={
-            "input": location,
+            "input": query,
             "inputtype": "textquery",
             "key": GOOGLE_API_KEY
         }
     )
-    
     data = response.json()
     if 'candidates' in data and data['candidates']:
         place_id = data['candidates'][0]['place_id']
@@ -273,7 +278,6 @@ def get_tourist_attraction(place_id):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         place = response.json()
-        formatted_attractions = []
         attraction = {
                     'name': place.get('displayName', {}).get('text', 'Non spécifié'),
                     'address': place.get('formattedAddress', 'Non spécifiée'),

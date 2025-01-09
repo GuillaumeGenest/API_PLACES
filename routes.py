@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from API_Places import *
-
+from typing import Optional
+import urllib.parse
 app = FastAPI()
 
 #"""
@@ -39,9 +40,12 @@ def get_attractions_by_coordinates(latitude: float, longitude: float, attraction
 #
 #"""
 
-@app.get("/attraction/{place_name}")
-def get_attraction_information(place_name):
-    place_id = get_place_id(place_name)
+@app.get("/attraction/name={place_name}&adress={address}")
+def get_attraction_information(place_name: str, address: str):
+
+    decoded_name = urllib.parse.unquote(place_name)
+    decoded_address = urllib.parse.unquote(address)
+    place_id = get_place_id(decoded_name, decoded_address)
     if place_id:
         attraction = get_tourist_attraction(place_id)
         if attraction:
@@ -63,7 +67,7 @@ def get_attraction_information_by_coordinates(latitude: float, longitude: float)
     if place_id:
         attraction = get_tourist_attraction(place_id)
         if attraction:
-            return JSONResponse(content= attraction)
+            return JSONResponse(content=attraction)
         else:
             raise HTTPException(status_code=404, detail="Aucune attraction trouvée")
     else:
