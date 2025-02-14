@@ -1,8 +1,7 @@
 import requests
 import os
-import json
 
-
+from dotenv import load_dotenv
 from enum import Enum
 from typing import List, Optional
 
@@ -40,7 +39,8 @@ def get_included_types(category: AttractionCategory) -> List[str]:
 
 
 # Récupérer la clé API de Google Places depuis les variables d'environnement
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+load_dotenv()
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 if not GOOGLE_API_KEY:
     raise Exception("La clé API Google Places n'est pas configurée")
 
@@ -68,6 +68,7 @@ def get_city_coordinates(city_name):
         location = data['results'][0]['geometry']['location']
         latitude = location['lat']
         longitude = location['lng']
+        print(f"les coordonnées sont  latitude {latitude}, longitude {longitude}")
         return latitude, longitude
     else:
         print("Aucune coordonnée trouvée pour cette ville.")
