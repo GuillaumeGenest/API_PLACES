@@ -12,6 +12,7 @@ class AttractionCategory(str, Enum):
     touristique = "touristique"
     nature = "nature"
     restaurant = "restaurant"
+    autre = "autre"
 
     """
     Retourne les types Google Places à inclure en fonction de la catégorie exacte demandée
@@ -206,6 +207,7 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
         formatted_attractions = []
         if 'places' in data:
             for place in data['places']:
+                category_name = category.value if category else AttractionCategory.autre.value
                 attraction = {
                     'name': place.get('displayName', {}).get('text', 'Non spécifié'),
                     'address': place.get('formattedAddress', 'Non spécifiée'),
@@ -219,7 +221,8 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
                     'google_maps_url': place.get('googleMapsUri', 'Non disponible'),
                     'phone': place.get('internationalPhoneNumber', 'Non disponible'),
                     'description': place.get('editorialSummary', {}).get('text'),
-                    'opening_hours': place.get('regularOpeningHours', {}).get('weekdayDescriptions', None)
+                    'opening_hours': place.get('regularOpeningHours', {}).get('weekdayDescriptions', None),
+                    'category': category_name
                 }
                 # Construire les URL des photos si disponibles
                 if 'photos' in place and len(place['photos']) > 0:
@@ -291,7 +294,8 @@ def get_tourist_attraction(place_id):
                     'google_maps_url': place.get('googleMapsUri', 'Non disponible'),
                     'phone': place.get('internationalPhoneNumber', 'Non disponible'),
                     'description': place.get('editorialSummary', {}).get('text'),
-                    'opening_hours': place.get('regularOpeningHours', {}).get('weekdayDescriptions', None)
+                    'opening_hours': place.get('regularOpeningHours', {}).get('weekdayDescriptions', None),
+                    'category': AttractionCategory.autre.value
         }
                 # Construire les URL des photos si disponibles
         if 'photos' in place and len(place['photos']) > 0:

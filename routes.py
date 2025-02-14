@@ -42,7 +42,6 @@ def get_attractions_by_coordinates(latitude: float, longitude: float, attraction
 
 @app.get("/attraction/name={place_name}&adress={address}")
 def get_attraction_information(place_name: str, address: str):
-
     decoded_name = urllib.parse.unquote(place_name)
     decoded_address = urllib.parse.unquote(address)
     place_id = get_place_id(decoded_name, decoded_address)
