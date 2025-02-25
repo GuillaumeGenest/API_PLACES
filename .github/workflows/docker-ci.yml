@@ -10,13 +10,13 @@ jobs:
       contents: read        # Accès en lecture au code source
       packages: write       # Accès en écriture aux packages
       actions: read    
-      
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4  # Récupère le code source du repo
 
       - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build Docker image
         run: |
