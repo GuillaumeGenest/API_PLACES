@@ -3,14 +3,23 @@ from unittest.mock import patch, Mock
 import sys
 import os
 
+import os
+import unittest
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import *
+# Définir l'environnement de test avant d'importer les modules
+os.environ['ENVIRONMENT'] = 'testing'
+GOOGLE_API_KEY = get_api_key()
+print(f"Clé API utilisée pour les tests: {GOOGLE_API_KEY}") 
 # Ajouter le chemin absolu du dossier contenant API_Places.py
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from API_Places import *
 import time
 
 from ConfigurationTest import CustomTestResult
 
-
+# MARK: - TestGetCityCoordinates
+# Classe de test pour la fonction 'get_city_coordinates'
+# Vérifie le bon fonctionnement de la fonction qui récupère les coordonnées d'une ville donnée
 
 class TestGetCityCoordinates(unittest.TestCase):
     def setUp(self):
@@ -35,6 +44,10 @@ class TestGetCityCoordinates(unittest.TestCase):
             'results': []
         }
 
+
+# MARK: - test_valid_city
+# Test avec une ville valide (Paris) : Vérifie que la fonction renvoie les bonnes coordonnées
+# - Utilise un mock pour simuler une réponse API avec des coordonnées pour Paris
     @patch('requests.get')
     def test_valid_city(self, mock_get):
         # Configuration du mock pour une ville valide
@@ -53,11 +66,14 @@ class TestGetCityCoordinates(unittest.TestCase):
             "https://maps.googleapis.com/maps/api/geocode/json",
             params={
                 "address": "Paris",
-                "key": GOOGLE_API_KEY,
+                "key": get_api_key(),
                 "language": "fr"
             }
         )
 
+# MARK: - test_city_not_found
+# Test avec une ville invalide (VilleInexistante) : Vérifie que la fonction retourne None
+# - Utilise un mock pour simuler une réponse API vide (aucun résultat trouvé)
     @patch('requests.get')
     def test_city_not_found(self, mock_get):
         # Configuration du mock pour une ville non trouvée
@@ -70,6 +86,9 @@ class TestGetCityCoordinates(unittest.TestCase):
         # Vérification
         self.assertIsNone(result)
 
+# MARK: - test_api_error
+# Test avec une erreur d'API : Vérifie que la fonction gère correctement les erreurs de réseau
+# - Simule une exception liée à une erreur de requête API
     @patch('requests.get')
     def test_api_error(self, mock_get):
         # Simulation d'une erreur d'API
@@ -78,6 +97,11 @@ class TestGetCityCoordinates(unittest.TestCase):
         # Test avec une erreur d'API
         with self.assertRaises(requests.exceptions.RequestException):
             get_city_coordinates("Paris")
+
+
+# MARK: - test_invalid_response_format
+# Test avec une réponse invalide de l'API : Vérifie que la fonction gère bien un format de réponse incorrect
+# - Utilise un mock pour simuler une réponse au format invalide (clé manquante dans la réponse)
 
     @patch('requests.get')
     def test_invalid_response_format(self, mock_get):

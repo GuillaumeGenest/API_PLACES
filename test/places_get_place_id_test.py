@@ -2,9 +2,9 @@ import unittest
 from unittest.mock import patch, Mock
 import sys
 import os
-
-# Ajouter le chemin absolu du dossier contenant API_Places.py
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Définir l'environnement de test avant d'importer les modules
+os.environ['ENVIRONMENT'] = 'testing'
 from API_Places import *
 import time
 
@@ -17,6 +17,10 @@ from ConfigurationTest import CustomTestResult
 # Classe personnalisée pour afficher les informations supplémentaires
 
 class TestGetPlaceID(unittest.TestCase):
+
+# MARK: - test_get_place_id_success
+# Test réussi pour la récupération du place_id lorsque le lieu existe.
+# - Utilise un mock pour simuler une réponse API réussie avec un lieu valide
     @patch('requests.get')
     def test_get_place_id_success(self, mock_get):
         # Arrange
@@ -42,6 +46,9 @@ class TestGetPlaceID(unittest.TestCase):
             }
         )
 
+# MARK: - test_get_place_id_no_results
+# Test lorsque aucun résultat n'est trouvé pour le lieu fourni.
+# - Utilise un mock pour simuler une réponse indiquant qu'il n'y a pas de résultat pour le lieu.
     @patch('requests.get')
     def test_get_place_id_no_results(self, mock_get):
          # Arrange
@@ -60,6 +67,10 @@ class TestGetPlaceID(unittest.TestCase):
         self.assertIsNone(result)
         mock_get.assert_called_once()
 
+
+# MARK: - test_get_place_id_api_error
+# Test lorsque l'API retourne une erreur (exemple : clé API invalide).
+# - Simule une réponse d'erreur avec un statut 'REQUEST_DENIED' et sans 'candidates'
     @patch('requests.get')
     def test_get_place_id_api_error(self, mock_get):
     #     # Arrange : Simuler une réponse d'erreur avec un statut 'REQUEST_DENIED' et sans 'candidates'

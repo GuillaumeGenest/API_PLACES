@@ -2,9 +2,9 @@ import unittest
 from unittest.mock import patch, Mock
 import sys
 import os
-
-# Ajouter le chemin absolu du dossier contenant API_Places.py
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Définir l'environnement de test avant d'importer les modules
+os.environ['ENVIRONMENT'] = 'testing'
 from API_Places import *
 from ConfigurationTest import CustomTestResult
 
@@ -39,15 +39,18 @@ class TestGetTouristAttractionsNearby(unittest.TestCase):
         mock_post.return_value = mock_response
 
         lat, lng, radius = 48.8588443, 2.2943506, 5000
-        result = get_tourist_attractions_nearby(lat, lng, radius)
+        result = get_tourist_attractions_nearby(lat, lng, AttractionCategory.touristique, radius)
+        self.assertEqual(result["attraction"][0]["name"], "Tour Eiffel")
+        self.assertEqual(result["attraction"][0]["address"], "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France")
+        self.assertEqual(result["attraction"][0]["place_id"], "ChIJD7fiBh9u5kcRYJSMaMOCCwQ")
+        self.assertEqual(result["attraction"][0]["latitude"], 48.8588443)
+        self.assertEqual(result["attraction"][0]["longitude"], 2.2943506)
+        self.assertEqual(result["attraction"][0]["rating"], 4.7)
+        self.assertEqual(result["attraction"][0]["user_ratings_total"], 12000)
+        self.assertEqual(result["attraction"][0]["google_maps_url"], "https://g.page/TourEiffel")
+        self.assertEqual(result["attraction"][0]["phone"], "+33 1 23 45 67 89")
 
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]['name'], "Tour Eiffel")
-        self.assertEqual(result[0]['address'], "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France")
-        self.assertEqual(result[0]['rating'], 4.7)
-        self.assertEqual(result[0]['google_maps_url'], "https://g.page/TourEiffel")
-        self.assertTrue(result[0]['photo_urls'][0].startswith("https://places.googleapis.com/v1/photo_reference/media?key="))
+    
 
     @patch('requests.post')
     def test_get_tourist_attractions_nearby_no_places_found(self, mock_post):
@@ -59,10 +62,8 @@ class TestGetTouristAttractionsNearby(unittest.TestCase):
         mock_post.return_value = mock_response
 
         lat, lng, radius = 48.8588443, 2.2943506, 5000
-        result = get_tourist_attractions_nearby(lat, lng, radius)
-
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 0)
+        result = get_tourist_attractions_nearby(lat, lng, AttractionCategory.touristique, radius)
+        self.assertEqual(result, {"attraction": []})
 
     @patch('requests.post')
     def test_get_tourist_attractions_nearby_api_error(self, mock_post):
@@ -73,7 +74,7 @@ class TestGetTouristAttractionsNearby(unittest.TestCase):
         mock_post.return_value = mock_response
 
         lat, lng, radius = 48.8588443, 2.2943506, 5000
-        result = get_tourist_attractions_nearby(lat, lng, radius)
+        result = get_tourist_attractions_nearby(lat, lng, AttractionCategory.touristique, radius)
 
         # Vérifie que le résultat est None en cas d'erreur API
         self.assertIsNone(result)
@@ -96,13 +97,14 @@ class TestGetTouristAttractionsNearby(unittest.TestCase):
         mock_post.return_value = mock_response
 
         lat, lng, radius = 48.8606, 2.3376, 5000
-        result = get_tourist_attractions_nearby(lat, lng, radius)
-
-        self.assertIsInstance(result, list)
+        result = get_tourist_attractions_nearby(lat, lng, AttractionCategory.touristique, radius)
+        self.assertIn("Louvre Museum", result["attraction"][0]["name"])
         self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]['name'], "Louvre Museum")
-        self.assertEqual(result[0]['address'], "Rue de Rivoli, 75001 Paris, France")
-        self.assertEqual(result[0]['rating'], "Non notée") 
+        self.assertEqual(result["attraction"][0]['name'], "Louvre Museum")
+        self.assertEqual(result["attraction"][0]['address'], "Rue de Rivoli, 75001 Paris, France")
+        self.assertEqual(result["attraction"][0]['rating'], "Non notée") 
+        
+
 
 if __name__ == '__main__':
 

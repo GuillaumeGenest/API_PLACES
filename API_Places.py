@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from enum import Enum
 from typing import List, Optional
-
+from config import *
 
 # Définition des catégories selon les spécifications exactes
 class AttractionCategory(str, Enum):
@@ -40,10 +40,8 @@ def get_included_types(category: AttractionCategory) -> List[str]:
 
 # Récupérer la clé API de Google Places depuis les variables d'environnement
 load_dotenv()
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-if not GOOGLE_API_KEY:
-    raise Exception("La clé API Google Places n'est pas configurée")
-
+GOOGLE_API_KEY = get_api_key()
+print(f"Clé API utilisée pour les tests: {GOOGLE_API_KEY}")  # Version simple
 #"""
 #    Obtient les coordonnées d'une ville en fonction de son nom.
 #

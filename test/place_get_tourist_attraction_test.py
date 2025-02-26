@@ -2,15 +2,19 @@ import unittest
 from unittest.mock import patch, Mock
 import sys
 import os
-
-# Ajouter le chemin absolu du dossier contenant API_Places.py
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Définir l'environnement de test avant d'importer les modules
+os.environ['ENVIRONMENT'] = 'testing'
 from API_Places import *
 import time
 
 from ConfigurationTest import CustomTestResult
 
 class TestGetTouristAttraction(unittest.TestCase):
+
+# MARK: - test_get_tourist_attraction_success
+# Test réussi pour la récupération des informations d'une attraction touristique.
+# - Utilise un mock pour simuler une réponse API contenant des informations détaillées pour l'attraction "Tour Eiffel"
     @patch('requests.get')
     def test_get_tourist_attraction_success(self, mock_get):
         # Configurer une réponse simulée pour un cas réussi
@@ -36,21 +40,23 @@ class TestGetTouristAttraction(unittest.TestCase):
         result = get_tourist_attraction("test_id")
 
         # Vérifier le résultat
-        self.assertIsNotNone(result)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]['name'], "Tour Eiffel")
-        self.assertEqual(result[0]['address'], "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France")
-        self.assertEqual(result[0]['latitude'], 48.8584)
-        self.assertEqual(result[0]['longitude'], 2.2945)
-        self.assertEqual(result[0]['rating'], 4.6)
-        self.assertEqual(result[0]['user_ratings_total'], 100000)
-        self.assertIn("https://places.googleapis.com/v1/photo_reference/media?key=", result[0]['photo_urls'][0])
-        self.assertEqual(result[0]['website'], "https://www.toureiffel.paris")
-        self.assertEqual(result[0]['google_maps_url'], "https://g.page/TourEiffel")
-        self.assertEqual(result[0]['phone'], "+33 892 70 12 39")
-        self.assertEqual(result[0]['description'], "Une tour emblématique de Paris.")
-        self.assertEqual(result[0]['opening_hours'], ["Lundi: 9:00 AM – 12:00 AM"])
+        self.assertEqual(result['attraction']['name'], "Tour Eiffel")
+        self.assertEqual(result['attraction']['address'], "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France")
+        self.assertEqual(result['attraction']['latitude'], 48.8584)
+        self.assertEqual(result['attraction']['longitude'], 2.2945)
+        self.assertEqual(result['attraction']['rating'], 4.6)
+        self.assertEqual(result['attraction']['user_ratings_total'], 100000)
+        self.assertIn("https://places.googleapis.com/v1/photo_reference/media?key=", result['attraction']['photo_urls'][0])
+        self.assertEqual(result['attraction']['website'], "https://www.toureiffel.paris")
+        self.assertEqual(result['attraction']['google_maps_url'], "https://g.page/TourEiffel")
+        self.assertEqual(result['attraction']['phone'], "+33 892 70 12 39")
+        self.assertEqual(result['attraction']['description'], "Une tour emblématique de Paris.")
+        self.assertEqual(result['attraction']['opening_hours'], ["Lundi: 9:00 AM – 12:00 AM"])
 
+
+# MARK: - test_get_tourist_attraction_failure
+# Test avec un échec de récupération des informations d'une attraction touristique.
+# - Utilise un mock pour simuler une réponse d'erreur (code 404) lorsqu'un ID d'attraction incorrect est passé
     @patch('requests.get')
     def test_get_tourist_attraction_failure(self, mock_get):
         # Configurer une réponse simulée pour un cas d'erreur
@@ -64,7 +70,9 @@ class TestGetTouristAttraction(unittest.TestCase):
         # Vérifier que le résultat est None en cas d'échec de la requête
         self.assertIsNone(result)
 
-
+# MARK: - test_api_error
+# Test avec une erreur d'API (problème réseau ou serveur).
+# - Simule une erreur d'API lors de l'appel avec un ID d'attraction valide, pour tester la gestion des exceptions
     @patch('requests.get')
     def test_api_error(self, mock_get):
         # Simule une erreur d'API
