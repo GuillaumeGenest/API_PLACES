@@ -21,7 +21,7 @@ jobs:
           pip install pytest
 
       - name: Run tests
-        run: pytest tests/  # Remplace `tests/` par le dossier contenant tes tests unitaires
+        run: pytest test/  # Remplace `tests/` par le dossier contenant tes tests unitaires
 
   build-and-push:
     needs: test
