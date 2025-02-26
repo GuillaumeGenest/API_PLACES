@@ -12,7 +12,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9.6'  # Ajuste selon la version que tu utilises
+          python-version: '3.13.2'  # Ajuste selon la version que tu utilises
 
       - name: Install dependencies
         run: |
