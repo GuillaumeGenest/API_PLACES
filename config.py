@@ -38,9 +38,9 @@ def get_openai_key():
 
     # Récupérer l'environnement depuis la variable d'environnement
     if env == 'development':
-        api_key = os.getenv('OPENAI_API_DEV')
+        api_key = os.getenv('OPENAI_API_KEY_DEV')
     elif env == 'testing':
-        api_key = os.getenv('OPENAI_API_DEV')
+        api_key = os.getenv('OPENAI_API_KEY_TEST')
     else:  # production par défaut
         api_key = os.getenv('OPENAI_API_KEY')
     
