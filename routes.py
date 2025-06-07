@@ -92,3 +92,18 @@ def get_trip_in_city(region: str, firstdate: str, lastdate: str):
         return JSONResponse(content=data)
     else:
         raise HTTPException(status_code=400, detail=f"Erreur dans les informations sur la requete")
+
+@app.get("/generate_url_image/place={place}")
+def get_url_photo(place: str):
+    decoded_name = urllib.parse.unquote(place)
+    place_id = get_place_id(decoded_name)
+    print(f"valeur de place_id {place_id}")
+    if place_id:
+        url = get_url_image(place_id)
+        if url:
+            return JSONResponse(content=url)
+        else:
+            raise HTTPException(status_code=404, detail="Aucun url trouvé")
+    else:
+        raise HTTPException(status_code=400, detail=f"Erreur dans le nom de la ville/région {place}, cette dernière n'existe pas")
+        
