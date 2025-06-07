@@ -28,7 +28,8 @@ jobs:
         env:
           ENVIRONMENT: testing
           GOOGLE_API_KEY_TEST: ${{ secrets.GOOGLE_API_KEY_TEST}}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY_TEST }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY_TEST}}
+          OPENAI_API_KEY_TEST: ${{ secrets.OPENAI_API_KEY_TEST}}
         
 
   build-and-push:
