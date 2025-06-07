@@ -250,6 +250,36 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
 #        dict: Les détails du lieu ou None en cas d'erreur
 #    """
 
+def get_url_image(place_id):
+    url = f"https://places.googleapis.com/v1/places/{place_id}"
+    
+    fields = [
+        "photos"
+    ]
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": GOOGLE_API_KEY,
+        "X-Goog-FieldMask": ",".join(fields),
+        "Accept-Language": "fr"
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+        photos = data.get("photos", [])
+        if photos:
+            photo_reference = photos[0].get("name")
+            if photo_reference:
+                photo_url = f"https://places.googleapis.com/v1/{photo_reference}/media?key={GOOGLE_API_KEY}&maxHeightPx=400&maxWidthPx=400"
+                return photo_url
+        return None
+  
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur lors de la requête à l'API Places: {e}")
+        return None
+
+
 def get_tourist_attraction(place_id):
     url = f"https://places.googleapis.com/v1/places/{place_id}"
     
