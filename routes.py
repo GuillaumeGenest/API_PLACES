@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from API_Places import *
+from API_Trip import *
 from typing import Optional
 import urllib.parse
 app = FastAPI()
@@ -71,3 +72,23 @@ def get_attraction_information_by_coordinates(latitude: float, longitude: float)
             raise HTTPException(status_code=404, detail="Aucune attraction trouvée")
     else:
         raise HTTPException(status_code=400, detail=f"Erreur dans les coordonnées de la ville {latitude} - {longitude}, cette dernière n'existe pas")
+
+
+@app.get("/generate_trip_city/city={city_name}&firstdate{firstdate}&lastdate{lastdate}")
+def get_trip_in_city(city_name: str, firstdate: str, lastdate: str):
+    data = generate_city_trip(city_name, firstdate, lastdate)
+    print(f"valeur de {data}")
+    if data:
+        return JSONResponse(content=data)
+    else:
+        raise HTTPException(status_code=400, detail=f"Erreur dans les informations sur la requete")
+
+
+@app.get("/generate_road_trip/country={region}&firstdate{firstdate}&lastdate{lastdate}")
+def get_trip_in_city(region: str, firstdate: str, lastdate: str):
+    data = generate_road_trip(region, firstdate, lastdate)
+    print(f"valeur de {data}")
+    if data:
+        return JSONResponse(content=data)
+    else:
+        raise HTTPException(status_code=400, detail=f"Erreur dans les informations sur la requete")
