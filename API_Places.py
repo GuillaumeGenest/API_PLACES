@@ -144,6 +144,20 @@ def get_place_id_from_coordinates(lat, lng):
         return None
 
 
+def get_representative_place_id(city_name):
+    url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+    params = {
+        "query": f"attractions à visiter à {city_name}",
+        "key": GOOGLE_API_KEY,
+        "language": "fr"
+    }
+    response = requests.get(url, params=params)
+    data = response.json()
+    if "results" in data and data["results"]:
+        return data["results"][0]["place_id"]  # Le plus populaire
+    return None
+
+
 #"""
 #    Recherche et Récupère les attractions touristiques dans un rayon de 5 km autour des coordonnées fournies.
 #    :param lat: Latitude du lieu.
