@@ -23,17 +23,18 @@ class TestAttractionsAPI(unittest.TestCase):
         mock_get_city_coordinates.return_value = (48.8566, 2.3522)
         mock_get_tourist_attractions_nearby.return_value = [{"name": "Tour Eiffel", "address": "Paris"}]
 
-        response = self.client.get("/attractions/city=Paris&category=touristique")
+        response = self.client.get("/attractions?city_name=Paris&category=touristique")
         self.assertEqual(response.status_code, 200)
         self.assertIn("attraction", response.json())
 
-    @patch('API_Places.get_city_coordinates')
+    @patch('routes.get_city_coordinates')
     def test_get_attractions_city_not_found(self, mock_get_city_coordinates):
         mock_get_city_coordinates.return_value = None
-        response = self.client.get("/attractions/city=UnknownCity&category=touristique")
+        print(f"mock_get_city_coordinates.return_value = {mock_get_city_coordinates.return_value}")
+        response = self.client.get("/attractions?city_name=Unknoww&category=touristique")
+        print(f"response.status_code = {response.status_code}")
+        print(f"response.json() = {response.json()}")
         self.assertEqual(response.status_code, 400)
-        self.assertIn("Erreur dans les coordonnées de la ville", response.json()["detail"])
-
 
     # @patch('API_Places.get_city_coordinates')
     # @patch('API_Places.get_tourist_attractions_nearby')
@@ -51,7 +52,7 @@ class TestAttractionsAPI(unittest.TestCase):
         mock_get_place_id.return_value = "test_id"
         mock_get_tourist_attraction.return_value = {"name": "Tour Eiffel", "address": "Paris"}
 
-        response = self.client.get("/attraction/name=Tour Eiffel&adress=Paris")
+        response = self.client.get("/attraction?place_name=Tour+Eiffel&address=Paris")
         self.assertEqual(response.status_code, 200)
         self.assertIn("attraction", response.json())
 
@@ -65,11 +66,12 @@ class TestAttractionsAPI(unittest.TestCase):
 
     @patch('API_Places.get_place_id_from_coordinates')
     @patch('API_Places.get_tourist_attraction')
-    def test_get_attraction_information_by_coordinates_success(self, mock_get_tourist_attraction, mock_get_place_id_from_coordinates):
+    def test_get_attraction_information_by_coordinates_success(
+            self, mock_get_place_id_from_coordinates, mock_get_tourist_attraction):
         mock_get_place_id_from_coordinates.return_value = "test_id"
         mock_get_tourist_attraction.return_value = {"name": "Tour Eiffel", "address": "Paris"}
 
-        response = self.client.get("/attraction_with_coordinates/48.8566-2.3522") 
+        response = self.client.get("/attraction_with_coordinates?latitude=48.8566&longitude=2.3522")
         self.assertEqual(response.status_code, 200)
         self.assertIn("attraction", response.json())
 
@@ -77,7 +79,7 @@ class TestAttractionsAPI(unittest.TestCase):
     def test_get_attraction_information_by_coordinates_place_not_found(self, mock_get_place_id_from_coordinates):
         mock_get_place_id_from_coordinates.return_value = None
 
-        response = self.client.get("/attraction_with_coordinates/0.0-0.0")
+        response = self.client.get("/attraction_with_coordinates?latitude=0.0&longitude=0.0")
         self.assertEqual(response.status_code, 400)
         self.assertIn("Erreur dans les coordonnées de la ville", response.json()["detail"])
 

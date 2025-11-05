@@ -11,8 +11,9 @@ app = FastAPI()
 #
 #"""
 
-@app.get("/attractions/city={city_name}&category={category}")
-def get_attractions(city_name, category: AttractionCategory):
+@app.get("/attractions")
+def get_attractions(city_name: str, category: AttractionCategory):
+    print(f"city_name reçu : {city_name}")
     coordinates = get_city_coordinates(city_name)
     if coordinates:
         attractions = get_tourist_attractions_nearby(coordinates[0], coordinates[1], category)
@@ -21,14 +22,17 @@ def get_attractions(city_name, category: AttractionCategory):
         else:
             raise HTTPException(status_code=404, detail="Aucune attraction trouvée")
     else:
-        raise HTTPException(status_code=400, detail=f"Erreur dans les coordonnées de la ville {city_name}, cette dernière n'existe pas")
-    
+        print(f"Lancement HTTPException pour ville inconnue {city_name}")
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Erreur dans les coordonnées de la ville {city_name}, cette dernière n'existe pas"
+        )
 #"""
 #    Requête pour Récupèrer et retourner les lieux avec leurs informations à partir d'un espace dont le centre correspond aux coordonnées
 #
 #"""
 
-@app.get("/attractions_with_coordinates/coordinates={latitude}-{longitude}&attractions={attraction}")
+@app.get("/attractions_with_coordinates")
 def get_attractions_by_coordinates(latitude: float, longitude: float, attraction: AttractionCategory):
     attractions = get_tourist_attractions_nearby(latitude, longitude, attraction)
     if attractions:
@@ -41,7 +45,7 @@ def get_attractions_by_coordinates(latitude: float, longitude: float, attraction
 #
 #"""
 
-@app.get("/attraction/name={place_name}&adress={address}")
+@app.get("/attraction")
 def get_attraction_information(place_name: str, address: str):
     decoded_name = urllib.parse.unquote(place_name)
     decoded_address = urllib.parse.unquote(address)
@@ -60,7 +64,7 @@ def get_attraction_information(place_name: str, address: str):
 #
 #"""
 
-@app.get("/attraction_with_coordinates/{latitude}-{longitude}")
+@app.get("/attraction_with_coordinates")
 def get_attraction_information_by_coordinates(latitude: float, longitude: float):
     place_id = get_place_id_from_coordinates(latitude, longitude)
     print(f"valeur de place_id {place_id}")
@@ -74,7 +78,10 @@ def get_attraction_information_by_coordinates(latitude: float, longitude: float)
         raise HTTPException(status_code=400, detail=f"Erreur dans les coordonnées de la ville {latitude} - {longitude}, cette dernière n'existe pas")
 
 
-@app.get("/generate_trip_city/city={city_name}&firstdate{firstdate}&lastdate{lastdate}")
+###########################################################################################
+
+###########################################################################################
+@app.get("/generate_trip_city")
 def get_trip_in_city(city_name: str, firstdate: str, lastdate: str):
     data = generate_city_trip(city_name, firstdate, lastdate)
     print(f"valeur de {data}")
@@ -83,17 +90,16 @@ def get_trip_in_city(city_name: str, firstdate: str, lastdate: str):
     else:
         raise HTTPException(status_code=400, detail=f"Erreur dans les informations sur la requete")
 
-
-@app.get("/generate_road_trip/country={region}&firstdate{firstdate}&lastdate{lastdate}")
-def get_trip_in_city(region: str, firstdate: str, lastdate: str):
+@app.get("/generate_road_trip")
+def get_roadtrip(region: str, firstdate: str, lastdate: str):
     data = generate_road_trip(region, firstdate, lastdate)
     print(f"valeur de {data}")
     if data:
         return JSONResponse(content=data)
     else:
-        raise HTTPException(status_code=400, detail=f"Erreur dans les informations sur la requete")
+        raise HTTPException(status_code=400, detail="Erreur dans les informations sur la requête")
 
-@app.get("/generate_url_image/place={place}")
+@app.get("/generate_url_image")
 def get_url_photo(place: str):
     decoded_name = urllib.parse.unquote(place)
     place_id = get_place_id(decoded_name)
@@ -106,4 +112,3 @@ def get_url_photo(place: str):
             raise HTTPException(status_code=404, detail="Aucun url trouvé")
     else:
         raise HTTPException(status_code=400, detail=f"Erreur dans le nom de la ville/région {place}, cette dernière n'existe pas")
-        
