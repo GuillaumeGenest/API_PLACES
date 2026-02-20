@@ -46,12 +46,11 @@ class TestAttractionsAPI(unittest.TestCase):
     #     self.assertEqual(response.status_code, 404)
     #     self.assertIn("Aucune attraction trouvée", response.json()["detail"])
 
-    @patch('API_Places.get_place_id')
-    @patch('API_Places.get_tourist_attraction')
-    def test_get_attraction_information_success(self, mock_get_tourist_attraction, mock_get_place_id):
-        mock_get_place_id.return_value = "test_id"
-        mock_get_tourist_attraction.return_value = {"name": "Tour Eiffel", "address": "Paris"}
-
+    @patch('routes.get_tourist_attraction')
+    @patch('routes.get_place_id')
+    def test_get_attraction_information_success(self, mock_get_place_id, mock_get_tourist_attraction):
+        mock_get_place_id.return_value = "ChIJD7fiBh9u5kcRYJSMaMOCCwQ"
+        mock_get_tourist_attraction.return_value = {"attraction": {"name": "Tour Eiffel", "address": "Paris"}}
         response = self.client.get("/attraction?place_name=Tour+Eiffel&address=Paris")
         self.assertEqual(response.status_code, 200)
         self.assertIn("attraction", response.json())
@@ -82,6 +81,37 @@ class TestAttractionsAPI(unittest.TestCase):
         response = self.client.get("/attraction_with_coordinates?latitude=0.0&longitude=0.0")
         self.assertEqual(response.status_code, 400)
         self.assertIn("Erreur dans les coordonnées de la ville", response.json()["detail"])
+
+    @patch('routes.generate_ai_attraction')
+    def test_get_ai_attraction_failure(self, mock_generate_ai_attraction):
+        mock_generate_ai_attraction.return_value = None
+        response = self.client.get("/generate_ai_attraction?place_name=LieuInexistant")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Erreur lors de la génération IA", response.json()["detail"])
+
+    @patch('routes.generate_ai_attraction')
+    def test_get_ai_attraction_success(self, mock_generate_ai_attraction):
+        mock_generate_ai_attraction.return_value = {
+            "attraction": [{
+                "name": "Tour Eiffel",
+                "address": "Paris",
+                "place_id": "ai_abc123",
+                "latitude": 48.8566,
+                "longitude": 2.3522,
+                "rating": 4.7,
+                "user_ratings_total": 12000,
+                "photo_urls": [],
+                "website": "http://www.toureiffel.paris",
+                "google_maps_url": "Non disponible",
+                "phone": "+33 1 23 45 67 89",
+                "description": "Monument emblématique de Paris",
+                "opening_hours": ["Lundi: 09:00 - 23:00"],
+                "category": "touristique"
+            }]
+        }
+        response = self.client.get("/generate_ai_attraction?place_name=Tour+Eiffel&address=Paris&category=touristique")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("attraction", response.json())
 
 
 if __name__ == '__main__':

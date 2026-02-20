@@ -112,3 +112,15 @@ def get_url_photo(place: str):
             raise HTTPException(status_code=404, detail="Aucun url trouvé")
     else:
         raise HTTPException(status_code=400, detail=f"Erreur dans le nom de la ville/région {place}, cette dernière n'existe pas")
+
+
+@app.get("/generate_ai_attraction")
+def get_ai_attraction(place_name: str, address: Optional[str] = None, category: str = "autre"):
+    decoded_name = urllib.parse.unquote(place_name)
+    decoded_address = urllib.parse.unquote(address) if address else None
+    data = generate_ai_attraction(decoded_name, decoded_address, category)
+    print(f"valeur de {data}")
+    if data:
+        return JSONResponse(content=data)
+    else:
+        raise HTTPException(status_code=400, detail=f"Erreur lors de la génération IA pour le lieu {place_name}")
