@@ -89,9 +89,9 @@ def generate_city_trip(ville: str, date_debut: str, date_fin: str):
         lieux_dto = []
         for idx, lieu in enumerate(data.get("lieux", []), start=1):
             trip_dto = {
-                "id": idx,
+                "id": str(idx),
                 "locationName": lieu.get("nom", ""),
-                "locationAddress": lieu.get("adresse", ""),
+                "locationAdress": lieu.get("adresse", ""),
                 "countryCode": lieu.get("countryCode", ""),
                 "latitude": lieu.get("latitude", 0.0),
                 "longitude": lieu.get("longitude", 0.0),
@@ -167,8 +167,7 @@ def generate_road_trip(city: str, date_start: str, date_end: str):
         print(f"Longueur: {len(response.output_text) if response.output_text else 0}")
         
         # Vérifier que la réponse n'est pas vide
-        if not response.output_text or response.output_text.strip() == "":
-            raise HTTPException(status_code=500, detail="La réponse de l'IA est vide")
+        if not response.output_text or response.output_text.strip() == "":            raise HTTPException(status_code=500, detail="La réponse de l'IA est vide")
         
         # Parse la réponse JSON
         clean_text = response.output_text.strip()
@@ -185,9 +184,9 @@ def generate_road_trip(city: str, date_start: str, date_end: str):
         villes_dto = []
         for idx, ville in enumerate(data.get("villes", []), start=1):
             trip_dto = {
-                "id": idx,
+                "id": str(idx),
                 "locationName": ville.get("nom", ""),
-                "locationAddress": ville.get("adresse", ""),
+                "locationAdress": ville.get("adresse", ""),
                 "countryCode": ville.get("countryCode", ""),
                 "latitude": ville.get("latitude", 0.0),
                 "longitude": ville.get("longitude", 0.0),
@@ -200,9 +199,9 @@ def generate_road_trip(city: str, date_start: str, date_end: str):
         id_counter = len(villes_dto) + 1
         for lieu in data.get("lieux", []):
             trip_dto = {
-                "id": id_counter,
+                "id": str(id_counter),
                 "locationName": lieu.get("nom", ""),
-                "locationAddress": lieu.get("adresse", ""),
+                "locationAdress": lieu.get("adresse", ""),
                 "countryCode": lieu.get("countryCode", ""),
                 "latitude": lieu.get("latitude", 0.0),
                 "longitude": lieu.get("longitude", 0.0),

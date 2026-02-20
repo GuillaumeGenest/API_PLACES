@@ -285,7 +285,7 @@ def get_url_image(place_id):
         if photos:
             photo_reference = photos[0].get("name")
             if photo_reference:
-                photo_url = f"https://places.googleapis.com/v1/{photo_reference}/media?key={GOOGLE_API_KEY}&maxHeightPx=400&maxWidthPx=400"
+                photo_url = f"https://places.googleapis.com/v1/{photo_reference}/media?key={GOOGLE_API_KEY}&maxHeightPx=1200&maxWidthPx=800"
                 return photo_url
         return None
   
