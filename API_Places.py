@@ -243,7 +243,6 @@ def get_representative_place_id(city_name):
 def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radius=5000):
     url = "https://places.googleapis.com/v1/places:searchNearby"
     
-    # Demander tous les champs nécessaires dans le FieldMask
     fields = [
         "places.id",
         "places.displayName",
@@ -251,13 +250,14 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
         "places.formattedAddress",
         "places.rating",
         "places.userRatingCount",
-        "places.photos",
         "places.websiteUri",
         "places.googleMapsUri",
         "places.internationalPhoneNumber",
         "places.editorialSummary",
         "places.regularOpeningHours",
-        "places.types"  # Ajout des types
+        "priceLevel",
+        "priceRange",
+        "places.types"
     ]
     
     headers = {
@@ -287,46 +287,46 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
         response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()
         data = response.json()
-        if response.status_code != 200:
-            print(f"Erreur lors de la requête à l'API Places: {response.status_code}")
-            return None
-        
-        # Formater les résultats
         formatted_attractions = []
+
         if 'places' in data:
             for place in data['places']:
                 category_name = category.value if category else AttractionCategory.autre.value
+                name = place.get('displayName', {}).get('text', 'Non spécifié')
+                address = place.get('formattedAddress', 'Non spécifiée')
+
+                # Concaténer nom + adresse pour la recherche de photo Wikipedia
+                wikipedia_query = f"{name} {address}"
+                photo_url = get_url_image_from_wikipedia(wikipedia_query)
+                photo_urls = [photo_url] if photo_url else []
+                
                 attraction = {
-                    'name': place.get('displayName', {}).get('text', 'Non spécifié'),
-                    'address': place.get('formattedAddress', 'Non spécifiée'),
+                    'name': name,
+                    'address': address,
                     'place_id': place.get('id', 'Non spécifié'),
                     'latitude': place.get('location', {}).get('latitude'),
                     'longitude': place.get('location', {}).get('longitude'),
                     'rating': place.get('rating', 'Non notée'),
                     'user_ratings_total': place.get('userRatingCount', 0),
-                    'photo_urls': [],
+                    'photo_urls': photo_urls,
                     'website': place.get('websiteUri', 'Non disponible'),
                     'google_maps_url': place.get('googleMapsUri', 'Non disponible'),
                     'phone': place.get('internationalPhoneNumber', 'Non disponible'),
                     'description': place.get('editorialSummary', {}).get('text'),
                     'opening_hours': place.get('regularOpeningHours', {}).get('weekdayDescriptions', None),
+                    'price_level': place.get('priceLevel', "Non disponible"),
+                    'price_range': place.get('priceRange', "Non disponible"),
                     'category': category_name
                 }
-                # Construire les URL des photos si disponibles
-                if 'photos' in place and len(place['photos']) > 0:
-                    for photo in place['photos']:
-                        photo_reference = photo.get('name')
-                        if photo_reference:
-                            photo_url = f"https://places.googleapis.com/v1/{photo_reference}/media?key={GOOGLE_API_KEY}&maxHeightPx=400&maxWidthPx=400"
-                            attraction['photo_urls'].append(photo_url)
                 formatted_attractions.append(attraction)
         return {"attraction": formatted_attractions}
     except requests.exceptions.HTTPError as http_err:
         print(f"Erreur HTTP lors de la requête à l'API Places: {http_err}")
-        return None
+        return {"attraction": []}  # Toujours retourner un dictionnaire vide
+
     except requests.exceptions.RequestException as e:
         print(f"Erreur lors de la requête à l'API Places: {e}")
-        return None
+        return {"attraction": []}  # Toujours retourner un dictionnaire vide
 
 
 #"""
@@ -357,6 +357,8 @@ def get_tourist_attraction(place_id):
         "internationalPhoneNumber",
         #"editorialSummary", -> see if needs Atmorphere
         "regularOpeningHours",
+        "priceLevel",
+        "priceRange",
         "types"
     ]
     
@@ -372,6 +374,7 @@ def get_tourist_attraction(place_id):
         response.raise_for_status()
         place = response.json()
 
+        print(place)
         name = place.get('displayName', {}).get('text', 'Non spécifié')
         address = place.get('formattedAddress', 'Non spécifiée')
 
@@ -394,6 +397,8 @@ def get_tourist_attraction(place_id):
                     'phone': place.get('internationalPhoneNumber', 'Non disponible'),
                     'description': description,
                     'opening_hours': place.get('regularOpeningHours', {}).get('weekdayDescriptions', None),
+                    'price_level': place.get('priceLevel', "Non disponible"),
+                    'price_range': place.get('priceRange', "Non disponible"),
                     'category': AttractionCategory.autre.value
         }
         return {"attraction": attraction}

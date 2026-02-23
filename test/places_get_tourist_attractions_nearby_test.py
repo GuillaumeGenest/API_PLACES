@@ -67,17 +67,16 @@ class TestGetTouristAttractionsNearby(unittest.TestCase):
 
     @patch('requests.post')
     def test_get_tourist_attractions_nearby_api_error(self, mock_post):
-        # Création de la réponse simulée
         mock_response = Mock()
-        mock_response.status_code = 403  # Erreur 403 (Forbidden)
-        mock_response.json.return_value = {}  # Réponse JSON vide pour l'erreur
+        mock_response.status_code = 403
+        mock_response.json.return_value = {}  # Réponse vide pour l'erreur
         mock_post.return_value = mock_response
 
         lat, lng, radius = 48.8588443, 2.2943506, 5000
         result = get_tourist_attractions_nearby(lat, lng, AttractionCategory.touristique, radius)
 
-        # Vérifie que le résultat est None en cas d'erreur API
-        self.assertIsNone(result)
+        # Vérifie que le résultat est vide quand l'API renvoie une erreur
+        self.assertEqual(result, {"attraction": []})
 
     @patch('requests.post')
     def test_get_tourist_attractions_nearby_partial_data(self, mock_post):
