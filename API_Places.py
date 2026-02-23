@@ -6,6 +6,9 @@ from enum import Enum
 from typing import List, Optional
 from config import *
 
+from API_Photos import *
+from API_Places_AI import *
+
 # Définition des catégories selon les spécifications exactes
 class AttractionCategory(str, Enum):
     touristique = "touristique"
@@ -80,7 +83,7 @@ def get_city_coordinates(city_name):
 #    :return: L'ID du lieu, ou None si aucune correspondance n'est trouvée.
 #"""
 
-def get_place_id(name, address=None):
+def get_place_id_text_search_essentials(name, address=None):
     # Construire la requête en combinant le nom et l'adresse si disponible
     query = name
     if address:
@@ -102,6 +105,78 @@ def get_place_id(name, address=None):
     else:
         print("Aucun ID trouvé pour ce lieu ou accès refusé.")
         return None
+
+#"""
+#    Recherche l'ID d'un lieu avec la nouvelle API Text Search
+#   en utilisant uniquement les champs gratuits (SKU Essentials ID Only).    
+#    :param name: Nom du lieu
+#   :param address: Adresse optionnelle pour affiner la recherche
+#    :return: place_id ou None si non trouvé
+#"""     
+
+def get_place_id(name, address=None):
+    query = name
+    if address:
+        query = f"{name}, {address}"
+
+    url = "https://places.googleapis.com/v1/places:searchText"
+    
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": GOOGLE_API_KEY,
+        "X-Goog-FieldMask": "places.id"
+    }
+
+    payload = {
+        "textQuery": query
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    
+    if response.status_code != 200:
+        print(f"Erreur API: {response.status_code} - {response.text}")
+        return None
+
+    data = response.json()
+
+    if "places" in data and len(data["places"]) > 0:
+        return data["places"][0]['id']  # directement l'id
+
+    print("Aucun ID trouvé pour ce lieu.")
+    return None
+
+
+def get_place_name(name, address=None):
+    query = name
+    if address:
+        query = f"{name}, {address}"
+
+    url = "https://places.googleapis.com/v1/places:searchText"
+    
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": GOOGLE_API_KEY,
+        "X-Goog-FieldMask": "places.name"
+    }
+
+    payload = {
+        "textQuery": query
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    
+    if response.status_code != 200:
+        print(f"Erreur API: {response.status_code} - {response.text}")
+        return None
+
+    data = response.json()
+
+    if "places" in data and len(data["places"]) > 0:
+        return data["places"][0]['name']  # directement l'id
+
+    print("Aucun ID trouvé pour ce lieu.")
+    return None
+
 
 #"""
 #    Récupère le place_id Google à partir de coordonnées géographiques en utilisant l'API Geocoding.
@@ -193,7 +268,7 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
     }
     
     payload = {
-        #"maxResultCount": max_results,
+        "maxResultCount": 10,
         "rankPreference": "POPULARITY",
         "locationRestriction": {
             "circle": {
@@ -264,34 +339,6 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
 #        dict: Les détails du lieu ou None en cas d'erreur
 #    """
 
-def get_url_image(place_id):
-    url = f"https://places.googleapis.com/v1/places/{place_id}"
-    
-    fields = [
-        "photos"
-    ]
-    headers = {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": GOOGLE_API_KEY,
-        "X-Goog-FieldMask": ",".join(fields),
-        "Accept-Language": "fr"
-    }
-    
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-        photos = data.get("photos", [])
-        if photos:
-            photo_reference = photos[0].get("name")
-            if photo_reference:
-                photo_url = f"https://places.googleapis.com/v1/{photo_reference}/media?key={GOOGLE_API_KEY}&maxHeightPx=1200&maxWidthPx=800"
-                return photo_url
-        return None
-  
-    except requests.exceptions.RequestException as e:
-        print(f"Erreur lors de la requête à l'API Places: {e}")
-        return None
 
 
 def get_tourist_attraction(place_id):
@@ -308,7 +355,7 @@ def get_tourist_attraction(place_id):
         "websiteUri",
         "googleMapsUri",
         "internationalPhoneNumber",
-        "editorialSummary",
+        #"editorialSummary", -> see if needs Atmorphere
         "regularOpeningHours",
         "types"
     ]
@@ -324,6 +371,15 @@ def get_tourist_attraction(place_id):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         place = response.json()
+
+        name = place.get('displayName', {}).get('text', 'Non spécifié')
+        address = place.get('formattedAddress', 'Non spécifiée')
+
+        # Description : générée via IA uniquement
+        description = generate_description(name, full_address=address)
+         # Récupération de la photo via la fonction dédiée
+        photo_url = get_url_image_from_google(place_id)
+        photo_urls = [photo_url] if photo_url else []
         attraction = {
                     'name': place.get('displayName', {}).get('text', 'Non spécifié'),
                     'address': place.get('formattedAddress', 'Non spécifiée'),
@@ -332,21 +388,14 @@ def get_tourist_attraction(place_id):
                     'longitude': place.get('location', {}).get('longitude'),
                     'rating': place.get('rating', 'Non notée'),
                     'user_ratings_total': place.get('userRatingCount', 0),
-                    'photo_urls': [],
+                    'photo_urls': photo_urls,
                     'website': place.get('websiteUri', 'Non disponible'),
                     'google_maps_url': place.get('googleMapsUri', 'Non disponible'),
                     'phone': place.get('internationalPhoneNumber', 'Non disponible'),
-                    'description': place.get('editorialSummary', {}).get('text'),
+                    'description': description,
                     'opening_hours': place.get('regularOpeningHours', {}).get('weekdayDescriptions', None),
                     'category': AttractionCategory.autre.value
         }
-                # Construire les URL des photos si disponibles
-        if 'photos' in place and len(place['photos']) > 0:
-                    for photo in place['photos']:
-                        photo_reference = photo.get('name')
-                        if photo_reference:
-                            photo_url = f"https://places.googleapis.com/v1/{photo_reference}/media?key={GOOGLE_API_KEY}&maxHeightPx=400&maxWidthPx=400"
-                            attraction['photo_urls'].append(photo_url)
         return {"attraction": attraction}
         
     except requests.exceptions.RequestException as e:

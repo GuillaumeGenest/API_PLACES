@@ -1,7 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.responses import PlainTextResponse
 from API_Places import *
 from API_Trip import *
+from API_Photos import *
+from API_Places_AI  import *
 from typing import Optional
 import urllib.parse
 app = FastAPI()
@@ -77,6 +80,108 @@ def get_attraction_information_by_coordinates(latitude: float, longitude: float)
     else:
         raise HTTPException(status_code=400, detail=f"Erreur dans les coordonnées de la ville {latitude} - {longitude}, cette dernière n'existe pas")
 
+@app.get("/generate_attraction")
+def get_ai_attraction(place_name: str, address: Optional[str] = None, category: str = "autre"):
+    decoded_name = urllib.parse.unquote(place_name)
+    decoded_address = urllib.parse.unquote(address) if address else None
+    data = generate_attraction(decoded_name, decoded_address, category)
+    print(f"valeur de {data}")
+    if data:
+        return JSONResponse(content=data)
+    else:
+        raise HTTPException(status_code=400, detail=f"Erreur lors de la génération IA pour le lieu {place_name}")
+
+
+
+###########################################################################################
+
+###########################################################################################
+
+@app.get("/generate_url_image/place", response_class=PlainTextResponse)
+def get_url_image(place: str):
+    decoded_name = urllib.parse.unquote(place)
+    url = get_url_image_from_wikipedia(place)
+
+    if not url:
+        raise HTTPException(
+            status_code=404,
+            detail="Aucun url trouvé"
+        )
+
+    return url
+
+@app.get("/get_url_image/place_and_address", response_class=PlainTextResponse)
+def get_url_image_by_place_and_address(place_name: str, address: Optional[str] = None):
+    decoded_name = urllib.parse.unquote(place_name)
+    decoded_address = urllib.parse.unquote(address) if address else None
+
+    place_id = get_place_id(decoded_name, decoded_address)
+
+    if not place_id:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Erreur dans le nom du lieu {place_name}"
+        )
+
+    url = get_url_image_from_google(place_id)
+
+    if not url:
+        raise HTTPException(
+            status_code=404,
+            detail="Aucun url trouvé"
+        )
+
+    return url
+
+
+@app.get("/get_url_image/id", response_class=PlainTextResponse)
+def get_url_image_by_id(place_id: str):
+
+    if not place_id:
+        raise HTTPException(
+            status_code=400,
+            detail="place_id manquant"
+        )
+
+    url = get_url_image_from_google(place_id)
+
+    if not url:
+        raise HTTPException(
+            status_code=404,
+            detail="Aucun url trouvé"
+        )
+
+    return url
+
+@app.get("/generate_description")
+def get_description(place_name: str, address: str = None):
+    try:
+        # Décodage propre des paramètres URL
+        decoded_name = urllib.parse.unquote(place_name)
+        decoded_address = urllib.parse.unquote(address) if address else None
+
+        description = generate_description(
+            place_name=decoded_name,
+            full_address=decoded_address
+        )
+
+        if description:
+            return description
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail="Impossible de générer une description pour ce lieu"
+            )
+
+    except HTTPException:
+        # On laisse passer les HTTPException pour renvoyer le bon status code
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erreur lors de la génération de la description : {str(e)}"
+        )
+
 
 ###########################################################################################
 
@@ -98,29 +203,3 @@ def get_roadtrip(region: str, firstdate: str, lastdate: str):
         return JSONResponse(content=data)
     else:
         raise HTTPException(status_code=400, detail="Erreur dans les informations sur la requête")
-
-@app.get("/generate_url_image")
-def get_url_photo(place: str):
-    decoded_name = urllib.parse.unquote(place)
-    place_id = get_place_id(decoded_name)
-    print(f"valeur de place_id {place_id}")
-    if place_id:
-        url = get_url_image(place_id)
-        if url:
-            return JSONResponse(content=url)
-        else:
-            raise HTTPException(status_code=404, detail="Aucun url trouvé")
-    else:
-        raise HTTPException(status_code=400, detail=f"Erreur dans le nom de la ville/région {place}, cette dernière n'existe pas")
-
-
-@app.get("/generate_ai_attraction")
-def get_ai_attraction(place_name: str, address: Optional[str] = None, category: str = "autre"):
-    decoded_name = urllib.parse.unquote(place_name)
-    decoded_address = urllib.parse.unquote(address) if address else None
-    data = generate_ai_attraction(decoded_name, decoded_address, category)
-    print(f"valeur de {data}")
-    if data:
-        return JSONResponse(content=data)
-    else:
-        raise HTTPException(status_code=400, detail=f"Erreur lors de la génération IA pour le lieu {place_name}")
