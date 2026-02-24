@@ -24,7 +24,7 @@ jobs:
           pip install pytest
 
       - name: Run tests
-        run: pytest test/  # Remplace `tests/` par le dossier contenant tes tests unitaires
+        run: pytest tests/  # Remplace `tests/` par le dossier contenant tes tests unitaires
         env:
           ENVIRONMENT: testing
           GOOGLE_API_KEY_TEST: ${{ secrets.GOOGLE_API_KEY_TEST}}

@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from enum import Enum
 from typing import List, Optional
-from config import *
+from app.core.config import *
 
 
 WIKIPEDIA_HEADERS = {
@@ -12,9 +12,6 @@ WIKIPEDIA_HEADERS = {
 }
 
 # Récupérer la clé API de Google Places depuis les variables d'environnement
-print("###############################################################")
-print("API_PHOTOS")
-print("###############################################################")
 load_dotenv()
 GOOGLE_API_KEY = get_api_key()
 print(f"Clé API utilisée pour les tests: {GOOGLE_API_KEY}")

@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from enum import Enum
 from typing import List, Optional
-from config import *
+from app.core.config import *
 from openai import OpenAI
 from datetime import datetime
 import json
@@ -13,7 +13,8 @@ from fastapi import HTTPException
 import json
 import uuid
 
-from API_Photos import *
+# Nouveau
+from app.api.API_Photos import get_url_image_from_wikipedia, get_url_image_from_google
 
 load_dotenv()
 OPENAI_API_KEY = get_openai_key()

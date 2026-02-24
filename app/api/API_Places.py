@@ -4,21 +4,22 @@ import os
 from dotenv import load_dotenv
 from enum import Enum
 from typing import List, Optional
-from config import *
+from app.core.config import *
 
-from API_Photos import *
-from API_Places_AI import *
+from app.api.API_Photos import get_url_image_from_wikipedia, get_url_image_from_google
+from app.api.API_Places_AI import generate_description
+from app.models.attraction import AttractionCategory
 
 # Définition des catégories selon les spécifications exactes
-class AttractionCategory(str, Enum):
-    touristique = "touristique"
-    nature = "nature"
-    restaurant = "restaurant"
-    autre = "autre"
+# class AttractionCategory(str, Enum):
+#     touristique = "touristique"
+#     nature = "nature"
+#     restaurant = "restaurant"
+#     autre = "autre"
 
-    """
-    Retourne les types Google Places à inclure en fonction de la catégorie exacte demandée
-    """
+#"""
+#Retourne les types Google Places à inclure en fonction de la catégorie exacte demandée
+#"""
 
 def get_included_types(category: AttractionCategory) -> List[str]:
     category_types = {
