@@ -48,3 +48,21 @@ def get_openai_key():
     if not api_key:
         raise Exception(f"La clé API OPENAI n'est pas configurée pour l'environnement {env}") 
     return api_key
+
+#"""
+#Retourne l'URL de connexion PostgreSQL en fonction de l'environnement actuel
+#"""
+def get_database_url():
+    env = os.getenv('ENVIRONMENT', 'production')
+
+    if env == 'development':
+        db_url = os.getenv('DATABASE_URL_DEV')
+    elif env == 'testing':
+        db_url = os.getenv('DATABASE_URL_TEST')
+    else:  # production par défaut
+        db_url = os.getenv('DATABASE_URL')
+
+    if not db_url:
+        raise Exception(f"La base de données n'est pas configurée pour l'environnement {env}")
+
+    return db_url
