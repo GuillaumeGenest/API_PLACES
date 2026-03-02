@@ -1,0 +1,47 @@
+{
+  "name": "Pays-Bas",
+  "country_code": "NL",
+  "capital": "Amsterdam",
+  "population": 18000000,
+  "currency": "Euro",
+  "currency_symbol": "€",
+  "phone_code": "+31",
+  "utc_offset": 1,
+  "visa": "Pas de visa requis pour les séjours touristiques de moins de 90 jours (UE).",
+  "climate": "Climat océanique tempéré.",
+  "religion": "Majorité non pratiquante, christianisme présent",
+  "culinary_customs": [
+    "Fromages réputés",
+    "Hareng cru traditionnel",
+    "Petit-déjeuner simple",
+    "Café fréquent"
+  ],
+  "social_customs": [
+    "Grande franchise",
+    "Usage massif du vélo",
+    "Égalité valorisée",
+    "Ponctualité"
+  ],
+  "politeness_phrases": {
+    "bonjour": "Hallo",
+    "merci": "Dank je",
+    "s'il vous plaît": "Alstublieft",
+    "au revoir": "Tot ziens"
+  },
+  "basic_vocabulary": {
+    "oui": "Ja",
+    "non": "Nee",
+    "combien": "Hoeveel",
+    "où": "Waar"
+  },
+  "numbers": {
+    "1": "Eén",
+    "2": "Twee",
+    "3": "Drie",
+    "4": "Vier",
+    "5": "Vijf"
+  },
+  "emergency_numbers": {
+    "general": "112"
+  }
+}

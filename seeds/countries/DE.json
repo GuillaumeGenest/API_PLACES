@@ -1,0 +1,47 @@
+{
+  "name": "Allemagne",
+  "country_code": "DE",
+  "capital": "Berlin",
+  "population": 84000000,
+  "currency": "Euro",
+  "currency_symbol": "€",
+  "phone_code": "+49",
+  "utc_offset": 1,
+  "visa": "Pas de visa requis pour les séjours touristiques de moins de 90 jours (UE).",
+  "climate": "Climat tempéré océanique et continental.",
+  "religion": "Christianisme (protestantisme et catholicisme)",
+  "culinary_customs": [
+    "Importance du pain",
+    "Saucisses traditionnelles",
+    "Bière artisanale",
+    "Repas du soir léger"
+  ],
+  "social_customs": [
+    "Ponctualité essentielle",
+    "Communication directe",
+    "Respect des règles",
+    "Séparation des déchets stricte"
+  ],
+  "politeness_phrases": {
+    "bonjour": "Guten Tag",
+    "merci": "Danke",
+    "s'il vous plaît": "Bitte",
+    "au revoir": "Auf Wiedersehen"
+  },
+  "basic_vocabulary": {
+    "oui": "Ja",
+    "non": "Nein",
+    "combien": "Wie viel",
+    "où": "Wo"
+  },
+  "numbers": {
+    "1": "Eins",
+    "2": "Zwei",
+    "3": "Drei",
+    "4": "Vier",
+    "5": "Fünf"
+  },
+  "emergency_numbers": {
+    "general": "112"
+  }
+}

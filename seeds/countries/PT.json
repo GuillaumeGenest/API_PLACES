@@ -1,0 +1,47 @@
+{
+  "name": "Portugal",
+  "country_code": "PT",
+  "capital": "Lisbonne",
+  "population": 10300000,
+  "currency": "Euro",
+  "currency_symbol": "€",
+  "phone_code": "+351",
+  "utc_offset": 0,
+  "visa": "Pas de visa requis pour les séjours touristiques de moins de 90 jours (UE).",
+  "climate": "Méditerranéen à influence océanique.",
+  "religion": "Christianisme (catholicisme majoritaire)",
+  "culinary_customs": [
+    "Bacalhau (morue) emblématique",
+    "Pastéis de nata",
+    "Repas en famille",
+    "Café expresso fréquent"
+  ],
+  "social_customs": [
+    "Accueil chaleureux",
+    "Importance de la famille",
+    "Conversation informelle",
+    "Respect des traditions religieuses"
+  ],
+  "politeness_phrases": {
+    "bonjour": "Olá",
+    "merci": "Obrigado / Obrigada",
+    "s'il vous plaît": "Por favor",
+    "au revoir": "Adeus"
+  },
+  "basic_vocabulary": {
+    "oui": "Sim",
+    "non": "Não",
+    "combien": "Quanto",
+    "où": "Onde"
+  },
+  "numbers": {
+    "1": "Um",
+    "2": "Dois",
+    "3": "Três",
+    "4": "Quatro",
+    "5": "Cinco"
+  },
+  "emergency_numbers": {
+    "general": "112"
+  }
+}
