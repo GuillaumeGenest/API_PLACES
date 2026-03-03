@@ -1,10 +1,27 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from app.core.config import get_database_url
+import logging
 
-engine = create_engine(get_database_url())
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+logger = logging.getLogger(__name__)
+
 Base = declarative_base()
+_engine = None
+_SessionLocal = None
+
+def get_engine():
+    global _engine
+    if _engine is None:
+        from app.core.config import get_database_url
+        _engine = create_engine(get_database_url())
+        logger.info("DB | Engine créé")
+    return _engine
+
+def SessionLocal():
+    global _SessionLocal
+    if _SessionLocal is None:
+        Session = sessionmaker(autocommit=False, autoflush=False, bind=get_engine())
+        _SessionLocal = Session
+    return _SessionLocal()
 
 def get_db():
     db = SessionLocal()
@@ -13,15 +30,9 @@ def get_db():
     finally:
         db.close()
 
-# Test uniquement quand on lance ce fichier directement
 if __name__ == "__main__":
-    import sys
-    import os
-    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-    
-    from app.core.config import get_database_url
     try:
-        engine.connect()
-        print("✅ Connexion à la base de données OK")
+        with get_engine().connect() as conn:
+            print("✅ Connexion à la base de données OK")
     except Exception as e:
         print(f"❌ Erreur de connexion : {e}")
