@@ -32,3 +32,5 @@ Thumbs.db
 # mock file 
 mocked.py
 mocked_openai.py
+routes.py
+test/

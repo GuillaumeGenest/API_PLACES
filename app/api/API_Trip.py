@@ -4,16 +4,22 @@ import os
 from dotenv import load_dotenv
 from enum import Enum
 from typing import List, Optional
-from config import *
+from app.core.config import *
 from openai import OpenAI
 from datetime import datetime
 import json
 from fastapi.responses import JSONResponse
 from fastapi import HTTPException
+import json
+import uuid
+
+# Nouveau
+from app.api.API_Photos import get_url_image_from_wikipedia, get_url_image_from_google
+from app.core.logger import setup_logger
+logger = setup_logger(__name__)
 
 load_dotenv()
 OPENAI_API_KEY = get_openai_key()
-print(f"Clé OPENAPI utilisée pour les tests: {OPENAI_API_KEY}")  # Version simple
 
 client = OpenAI()
 
@@ -26,16 +32,18 @@ client = OpenAI()
 def generate_city_trip(ville: str, date_debut: str, date_fin: str):
     try:
         # Vérification cohérence des dates
+        logger.info(f"TRIP | Génération city trip — ville={ville} du {date_debut} au {date_fin}")
         debut = datetime.strptime(date_debut, "%Y-%m-%d")
         fin = datetime.strptime(date_fin, "%Y-%m-%d")
         
         if debut > fin:
+            logger.warning(f"TRIP | Dates incohérentes — début={date_debut} fin={date_fin}")
             raise HTTPException(
                 status_code=400, 
                 detail="La date de début doit être antérieure ou égale à la date de fin."
             )
         
-        print(f"Visite de {ville} du {date_debut} au {date_fin}.")
+        logger.info(f"OPENAI | Appel API — modèle=gpt-4.1-mini ville={ville}")
         
         # Prompt optimisé
         prompt = (
@@ -68,7 +76,7 @@ def generate_city_trip(ville: str, date_debut: str, date_fin: str):
             ]
         )
         
-        print("Réponse brute:", response.output_text)
+        logger.debug(f"OPENAI | Réponse reçue — longueur={response.output_text}")
          # Vérifier que la réponse n'est pas vide
         if not response.output_text or response.output_text.strip() == "":
             raise HTTPException(status_code=500, detail="La réponse de l'IA est vide")
@@ -102,13 +110,14 @@ def generate_city_trip(ville: str, date_debut: str, date_fin: str):
         return {"lieux": lieux_dto}
         
     except ValueError as e:
-        print(f"Erreur de format de date: {e}")
+        logger.error(f"TRIP | Format de date invalide. {e}")
         raise HTTPException(status_code=400, detail="Format de date invalide. Utilisez YYYY-MM-DD")
     except json.JSONDecodeError as e:
-        print(f"Erreur de parsing JSON: {e}")
+        logger.error(f"TRIP | Erreur parsing JSON OpenAI — {e}")
         raise HTTPException(status_code=500, detail="Erreur lors du parsing de la réponse IA")
     except Exception as e:
         print(f"Erreur inattendue: {str(e)}")
+        logger.error(f"TRIP | Erreur inattendue {type(e).__name__} : {e}")
         raise HTTPException(status_code=500, detail=f"Erreur serveur: {str(e)}")
 
 #def lieux_a_visiter(
@@ -120,14 +129,16 @@ def generate_city_trip(ville: str, date_debut: str, date_fin: str):
 def generate_road_trip(city: str, date_start: str, date_end: str):
     try:
         # Vérification cohérence des dates
+        logger.info(f"TRIP | Génération road trip — ville={ville} du {date_debut} au {date_fin}")
         debut = datetime.strptime(date_start, "%Y-%m-%d")
         fin = datetime.strptime(date_end, "%Y-%m-%d")
         if debut > fin:
+            logger.warning(f"TRIP | Dates incohérentes — début={date_debut} fin={date_fin}")
             raise HTTPException(
                 status_code=400, 
                 detail="La date de début doit être antérieure ou égale à la date de fin."
             )
-        print(f"Je fais un road trip en {city} du {date_start} au {date_end}.")
+        logger.info(f"OPENAI | Appel API — modèle=gpt-4.1-mini ville {city} du {date_start} au {date_end}")
         # Nouveau prompt avec planification demandée au modèle
 
         prompt = (
@@ -162,9 +173,7 @@ def generate_road_trip(city: str, date_start: str, date_end: str):
         )
        # DÉBOGAGE : Afficher le type et le contenu de la réponse
         print(f"Type de response: {type(response)}")
-        print(f"Attributs de response: {dir(response)}")
-        print(f"Réponse brute (output_text): '{response.output_text}'")
-        print(f"Longueur: {len(response.output_text) if response.output_text else 0}")
+        logger.debug(f"OPENAI | Réponse reçue ={response.output_text}")
         
         # Vérifier que la réponse n'est pas vide
         if not response.output_text or response.output_text.strip() == "":            raise HTTPException(status_code=500, detail="La réponse de l'IA est vide")
@@ -216,16 +225,13 @@ def generate_road_trip(city: str, date_start: str, date_end: str):
         }
         
     except ValueError as e:
-        print(f"Erreur de format de date (ValueError): {e}")
+        logger.error(f"TRIP | Erreur de format de date (ValueError): {e}")
         raise HTTPException(status_code=400, detail="Format de date invalide. Utilisez YYYY-MM-DD")
     except json.JSONDecodeError as e:
-        print(f"Erreur de parsing JSON: {e}")
-        print(f"Contenu reçu: '{response.output_text if 'response' in locals() else 'Pas de réponse'}'")
+        logger.error(f"TRIP | Erreur parsing JSON OpenAI — {e}")
         raise HTTPException(status_code=500, detail="Erreur lors du parsing de la réponse IA")
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Erreur inattendue: {type(e).__name__} - {str(e)}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"TRIP | Erreur inattendue — {type(e).__name__}: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur serveur: {str(e)}")

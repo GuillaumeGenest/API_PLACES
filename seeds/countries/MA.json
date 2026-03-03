@@ -1,0 +1,50 @@
+{
+  "name": "Maroc",
+  "country_code": "MA",
+  "capital": "Rabat",
+  "population": 37400000,
+  "currency": "Dirham marocain",
+  "currency_symbol": "MAD",
+  "phone_code": "+212",
+  "utc_offset": 0,
+  "visa": "Pas de visa requis pour les séjours touristiques de moins de 90 jours (UE).",
+  "climate": "Climat méditerranéen au nord, désertique au sud, continental à l'intérieur.",
+  "religion": "Islam (majoritaire)",
+  "culinary_customs": [
+    "Manger avec la main droite",
+    "Partager le plat commun",
+    "Thé à la menthe servi en signe d'hospitalité",
+    "Couscous traditionnel le vendredi"
+  ],
+  "social_customs": [
+    "Salutation avec poignée de main",
+    "Respect important envers les aînés",
+    "Tenue vestimentaire modeste recommandée",
+    "Négociation fréquente dans les souks"
+  ],
+  "politeness_phrases": {
+    "bonjour": "Salam alaykoum",
+    "merci": "Shukran",
+    "s'il vous plaît": "Afak",
+    "au revoir": "Bslama"
+  },
+  "basic_vocabulary": {
+    "oui": "Na'am",
+    "non": "La",
+    "combien": "Bchhal",
+    "où": "Fin"
+  },
+  "numbers": {
+    "1": "Wahed",
+    "2": "Jouj",
+    "3": "Tlata",
+    "4": "Rb3a",
+    "5": "Khamsa"
+  },
+  "emergency_numbers": {
+    "police": "19",
+    "ambulance": "15",
+    "pompiers": "15",
+    "gendarmerie": "177"
+  }
+}

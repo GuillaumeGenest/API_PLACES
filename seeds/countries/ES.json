@@ -1,0 +1,47 @@
+{
+  "name": "Espagne",
+  "country_code": "ES",
+  "capital": "Madrid",
+  "population": 48000000,
+  "currency": "Euro",
+  "currency_symbol": "€",
+  "phone_code": "+34",
+  "utc_offset": 1,
+  "visa": "Pas de visa requis pour les séjours touristiques de moins de 90 jours (UE).",
+  "climate": "Méditerranéen, océanique au nord, semi-aride au sud.",
+  "religion": "Christianisme (catholicisme majoritaire)",
+  "culinary_customs": [
+    "Tapas à partager",
+    "Repas tardifs",
+    "Paella traditionnelle",
+    "Culture du café et des bars"
+  ],
+  "social_customs": [
+    "Bises pour saluer",
+    "Ambiance conviviale",
+    "Sieste dans certaines régions",
+    "Vie nocturne animée"
+  ],
+  "politeness_phrases": {
+    "bonjour": "Hola",
+    "merci": "Gracias",
+    "s'il vous plaît": "Por favor",
+    "au revoir": "Adiós"
+  },
+  "basic_vocabulary": {
+    "oui": "Sí",
+    "non": "No",
+    "combien": "Cuánto",
+    "où": "Dónde"
+  },
+  "numbers": {
+    "1": "Uno",
+    "2": "Dos",
+    "3": "Tres",
+    "4": "Cuatro",
+    "5": "Cinco"
+  },
+  "emergency_numbers": {
+    "general": "112"
+  }
+}
