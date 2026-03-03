@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
-
+from app.core.logger import setup_logger
+logger = setup_logger(__name__)
 # Charger les variables d'environnement
 load_dotenv()
 
@@ -25,8 +26,9 @@ def get_api_key():
     
     # Vérification que la clé existe
     if not api_key:
+        logger.error(f"Clé API Google manquante pour l'environnement : {env}")
         raise Exception(f"La clé API Google Places n'est pas configurée pour l'environnement {env}")
-        
+    logger.info(f"Clé API Google chargée pour l'environnement : {env}")
     return api_key
 
 
@@ -46,7 +48,9 @@ def get_openai_key():
     
     # Vérification que la clé existe
     if not api_key:
+        logger.error(f"Clé API OPENAI manquante pour l'environnement : {env}")
         raise Exception(f"La clé API OPENAI n'est pas configurée pour l'environnement {env}") 
+    logger.debug(f"Clé API OPENAI chargée pour l'environnement : {env}")
     return api_key
 
 #"""
@@ -63,6 +67,7 @@ def get_database_url():
         db_url = os.getenv('DATABASE_URL')
 
     if not db_url:
+        logger.error(f"La base de données n'est pas configurée pour l'environnement: {env}")
         raise Exception(f"La base de données n'est pas configurée pour l'environnement {env}")
-
+    logger.info(f"La base de données est configurée pour l'environnement : {env}")
     return db_url
