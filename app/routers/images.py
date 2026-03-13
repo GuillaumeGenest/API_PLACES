@@ -3,18 +3,21 @@ from fastapi.responses import PlainTextResponse
 from typing import Optional
 from app.services.photos_service import PhotosService
 from app.services.places_service import PlacesService
+from app.services.storage_service import is_stored, get_storage_url, download_and_store
 from app.core.exceptions import PlaceNotFoundError, ImageNotFoundError, PlaceIdMissingError
 from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
-
 router = APIRouter(prefix="/images", tags=["Images"])
 
+
+places_service = PlacesService()
+photos_service = PhotosService()
+
 @router.get("/place", response_class=PlainTextResponse)
-def get_url_image_by_name(place: str):
+async def get_url_image_by_name(place: str):
     logger.info(f"HTTP | GET /images/place — place={place}")
     service = PhotosService()
-
     url = service.get_image_by_name(place)
     if not url:
         logger.warning(f"HTTP | GET /images/place — image introuvable place={place}")
@@ -25,38 +28,62 @@ def get_url_image_by_name(place: str):
 
 
 @router.get("/place_and_address", response_class=PlainTextResponse)
-def get_url_image_by_name_and_address(place_name: str, address: Optional[str] = None):
+async def get_url_image_by_name_and_address(place_name: str, address: Optional[str] = None):
     logger.info(f"HTTP | GET /images/place_and_address — place={place_name} address={address}")
-    places_service = PlacesService()
-    photos_service = PhotosService()
 
+    # 1️⃣ Récupérer le place_id
     place_id = places_service.get_place_id(place_name, address)
     if not place_id:
-        logger.warning(f"HTTP | GET /images/place_and_address — place_id introuvable place={place_name}")
+        logger.warning(f"HTTP | place_id introuvable — place={place_name}")
         raise PlaceNotFoundError(place_name)
 
-    url = photos_service.get_image_by_place_id(place_id)
-    if not url:
-        logger.warning(f"HTTP | GET /images/place_and_address — image introuvable place_id={place_id}")
+    # 2️⃣ Image déjà stockée ? → retourne l'URL directement sans appel Google Photos
+    if is_stored(place_id):
+        storage_url = get_storage_url(place_id)
+        logger.info(f"STORAGE | ✅ Image en cache — Google Photos non appelé — place={place_name} place_id={place_id} url={storage_url}")
+        return storage_url
+
+    # 3️⃣ Cache miss → récupère l'URL Google Photos
+    logger.info(f"STORAGE | ❌ Image absente du cache — appel Google Photos — place={place_name} place_id={place_id}")
+    google_url = photos_service.get_image_by_place_id(place_id)
+    if not google_url:
+        logger.warning(f"HTTP | image Google introuvable — place_id={place_id}")
         raise ImageNotFoundError()
 
-    logger.info(f"HTTP | GET /images/place_and_address — succès place={place_name} place_id={place_id}")
-    return url
+    # 4️⃣ Télécharge depuis Google → stocke → retourne l'URL propre
+    storage_url = await download_and_store(place_id, google_url)
+    if not storage_url:
+        raise ImageNotFoundError()
+
+    logger.info(f"HTTP | ✅ Succès — place={place_name} place_id={place_id} url={storage_url}")
+    return storage_url
 
 
 @router.get("/id", response_class=PlainTextResponse)
-def get_url_image_by_id(place_id: str):
+async def get_url_image_by_id(place_id: str):
     logger.info(f"HTTP | GET /images/id — place_id={place_id}")
 
     if not place_id:
-        logger.warning("HTTP | GET /images/id — place_id manquant")
+        logger.warning("HTTP | place_id manquant")
         raise PlaceIdMissingError()
 
-    service = PhotosService()
-    url = service.get_image_by_place_id(place_id)
-    if not url:
-        logger.warning(f"HTTP | GET /images/id — image introuvable place_id={place_id}")
+    # 1️⃣ Image déjà stockée ? → retourne l'URL directement sans appel Google Photos
+    if is_stored(place_id):
+        storage_url = get_storage_url(place_id)
+        logger.info(f"STORAGE | ✅ Image en cache — Google Photos non appelé — place_id={place_id} url={storage_url}")
+        return storage_url
+
+    # 2️⃣ Cache miss → récupère l'URL Google Photos
+    logger.info(f"STORAGE | ❌ Image absente du cache — appel Google Photos — place_id={place_id}")
+    google_url = photos_service.get_image_by_place_id(place_id)
+    if not google_url:
+        logger.warning(f"HTTP | image Google introuvable — place_id={place_id}")
         raise ImageNotFoundError()
 
-    logger.info(f"HTTP | GET /images/id — succès place_id={place_id}")
-    return url
+    # 3️⃣ Télécharge depuis Google → stocke → retourne l'URL propre
+    storage_url = await download_and_store(place_id, google_url)
+    if not storage_url:
+        raise ImageNotFoundError()
+
+    logger.info(f"HTTP | ✅ Succès — place_id={place_id} url={storage_url}")
+    return storage_url
