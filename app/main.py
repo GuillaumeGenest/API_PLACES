@@ -1,9 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 from app.core.logger import setup_logger
 from app.core.exceptions import add_exception_handlers
 from app.routers import attractions, attraction, images, descriptions, ai, trips, countries_info
-from fastapi import FastAPI, Request
 import time
+import os
+
 logger = setup_logger("api")
 
 app = FastAPI(
@@ -22,6 +24,10 @@ async def log_requests(request: Request, call_next):
     return response
 
 add_exception_handlers(app)
+
+STORAGE_DIR = os.path.join(os.path.dirname(__file__), "..", "images", "storage", "caches")
+os.makedirs(STORAGE_DIR, exist_ok=True)
+app.mount("/images/storage/caches", StaticFiles(directory=STORAGE_DIR), name="storage")
 
 app.include_router(attractions.router)
 app.include_router(attraction.router)
