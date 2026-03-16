@@ -20,8 +20,8 @@ class PlacesService:
     def get_place_id_from_coordinates(self, latitude: float, longitude: float) -> Optional[str]:
         return get_place_id_from_coordinates(latitude, longitude)
 
-    def get_tourist_attraction(self, place_id: str) -> Optional[dict]:
-        return get_tourist_attraction(place_id)
+    async def get_tourist_attraction(self, place_id: str) -> Optional[dict]:
+        return await get_tourist_attraction(place_id)
 
     def get_tourist_attractions_nearby(self, latitude: float, longitude: float, category) -> Optional[dict]:
         return get_tourist_attractions_nearby(latitude, longitude, category)

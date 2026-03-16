@@ -8,6 +8,7 @@ from app.core.logger import setup_logger
 from app.api.API_Photos import get_url_image_from_wikipedia, get_url_image_from_google
 from app.api.API_Places_AI import generate_description
 from app.models.attraction import AttractionCategory
+from app.services.storage_service import is_stored, get_storage_url, download_and_store
 
 logger = setup_logger(__name__)
 
@@ -232,7 +233,7 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
         return {"attraction": []}
 
 
-def get_tourist_attraction(place_id):
+async def get_tourist_attraction(place_id: str):
     logger.info(f"GOOGLE | Récupération attraction — place_id={place_id}")
     url = f"https://places.googleapis.com/v1/places/{place_id}"
     fields = [
@@ -259,8 +260,19 @@ def get_tourist_attraction(place_id):
         logger.debug(f"OPENAI | Génération description — name={name}")
         description = generate_description(name, full_address=address)
 
+        # ─── Photo avec cache ─────────────────────────────────
         logger.debug(f"GOOGLE | Récupération photo — place_id={place_id}")
-        photo_url = get_url_image_from_google(place_id)
+        if is_stored(place_id):
+            photo_url = get_storage_url(place_id)
+            logger.info(f"STORAGE | ✅ Cache hit — place_id={place_id}")
+        else:
+            logger.info(f"STORAGE | ❌ Cache miss — appel Google Photos — place_id={place_id}")
+            google_url = get_url_image_from_google(place_id)
+            if google_url:
+                photo_url = await download_and_store(place_id, google_url)
+            else:
+                photo_url = None
+        # ──────────────────────────────────────────────────────
 
         attraction = {
             'name': name,

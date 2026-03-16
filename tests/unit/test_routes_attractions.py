@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import unittest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 from app.main import app
 
 
@@ -64,9 +64,9 @@ class TestGetAttraction(unittest.TestCase):
         with patch('app.routers.attraction.PlacesService') as MockService:
             instance = MockService.return_value
             instance.get_place_id.return_value = "ChIJD7fiBh9u5kcRYJSMaMOCCwQ"
-            instance.get_tourist_attraction.return_value = {
+            instance.get_tourist_attraction = AsyncMock(return_value={
                 "attraction": {"name": "Tour Eiffel", "address": "Paris"}
-            }
+            })
             response = self.client.get("/attraction/by_name?place_name=Tour+Eiffel&address=Paris")
             self.assertEqual(response.status_code, 200)
             self.assertIn("attraction", response.json())
@@ -83,9 +83,9 @@ class TestGetAttraction(unittest.TestCase):
         with patch('app.routers.attraction.PlacesService') as MockService:
             instance = MockService.return_value
             instance.get_place_id_from_coordinates.return_value = "ChIJD7fiBh9u5kcRYJSMaMOCCwQ"
-            instance.get_tourist_attraction.return_value = {
+            instance.get_tourist_attraction = AsyncMock(return_value={
                 "attraction": {"name": "Tour Eiffel", "address": "Paris"}
-            }
+            })
             response = self.client.get("/attraction/by_coordinates?latitude=48.8566&longitude=2.3522")
             self.assertEqual(response.status_code, 200)
             self.assertIn("attraction", response.json())
