@@ -11,7 +11,6 @@ WIKIPEDIA_HEADERS = {
     "User-Agent": "PlacesApp/1.0 (contact@tonapp.com)"
 }
 
-load_dotenv()
 GOOGLE_API_KEY = get_api_key()
 
 

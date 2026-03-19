@@ -12,7 +12,7 @@ from app.services.storage_service import is_stored, get_storage_url, download_an
 
 logger = setup_logger(__name__)
 
-load_dotenv()
+
 GOOGLE_API_KEY = get_api_key()
 
 def get_included_types(category: AttractionCategory) -> List[str]:

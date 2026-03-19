@@ -7,6 +7,15 @@ logger = setup_logger(__name__)
 # Charger les variables d'environnement
 load_dotenv()
 
+def check_env():
+    """Vérifie et charge toutes les variables d'environnement au démarrage"""
+    get_api_key()
+    get_openai_key()
+    get_server_base_url()
+    get_supabase_url()
+    get_supabase_key()
+    logger.info("✅ Toutes les variables d'environnement sont chargées")
+
 
 def _get_env_variable(env_map: dict, label: str) -> str:
     """
@@ -32,7 +41,7 @@ def get_api_key():
         {
             "development": "GOOGLE_API_KEY_DEV",
             "testing": "GOOGLE_API_KEY_TEST",
-            "production": "GOOGLE_API_KEY",
+            "production": "GOOGLE_API_KEY_PROD",
         },
         "Clé API Google Places",
     )
@@ -44,7 +53,7 @@ def get_openai_key():
         {
             "development": "OPENAI_API_KEY_DEV",
             "testing": "OPENAI_API_KEY_TEST",
-            "production": "OPENAI_API_KEY",
+            "production": "OPENAI_API_KEY_PROD",
         },
         "Clé API OpenAI",
     )
@@ -56,7 +65,7 @@ def get_database_url():
         {
             "development": "DATABASE_URL_DEV",
             "testing": "DATABASE_URL_TEST",
-            "production": "DATABASE_URL",
+            "production": "DATABASE_URL_PROD",
         },
         "DATABASE_URL",
     )
@@ -68,7 +77,28 @@ def get_server_base_url():
         {
             "development": "SERVER_BASE_URL_DEV",
             "testing": "SERVER_BASE_URL_TEST",
-            "production": "SERVER_BASE_URL",
+            "production": "SERVER_BASE_URL_PROD",
         },
         "SERVER_BASE_URL",
+    )
+
+def get_supabase_url():
+    return _get_env_variable(
+        {
+            "development": "SUPABASE_BASE_URL_DEV",  # ✅
+            "testing": "SUPABASE_BASE_URL_TEST",
+            "production": "SUPABASE_BASE_URL_PROD",
+        },
+        "SUPABASE_URL",
+    )
+
+# MARK: - Supabase Key
+def get_supabase_key():
+    return _get_env_variable(
+        {
+            "development": "SUPABASE_API_KEY_DEV",  # ✅
+            "testing": "SUPABASE_API_KEY_TEST",
+            "production": "SUPABASE_API_KEY_PROD",
+        },
+        "SUPABASE_KEY",
     )
