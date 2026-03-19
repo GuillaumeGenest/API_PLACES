@@ -171,7 +171,7 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
         "places.formattedAddress", "places.rating", "places.userRatingCount",
         "places.websiteUri", "places.googleMapsUri", "places.internationalPhoneNumber",
         "places.editorialSummary", "places.regularOpeningHours",
-        "priceLevel", "priceRange", "places.types"
+        "places.priceLevel", "places.priceRange", "places.types"
     ]
     headers = {
         "Content-Type": "application/json",
@@ -187,6 +187,7 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
         },
         "includedTypes": get_included_types(category)
     }
+    logger.debug(f"GOOGLE | Payload envoyé — {payload}")
     try:
         response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()
@@ -204,19 +205,19 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
                 attraction = {
                     'name': name,
                     'address': address,
-                    'place_id': place.get('id', 'Non spécifié'),
+                    'place_id': place.get('id'),
                     'latitude': place.get('location', {}).get('latitude'),
                     'longitude': place.get('location', {}).get('longitude'),
-                    'rating': place.get('rating', 'Non notée'),
+                    'rating': place.get('rating'),
                     'user_ratings_total': place.get('userRatingCount', 0),
                     'photo_urls': [photo_url] if photo_url else [],
-                    'website': place.get('websiteUri', 'Non disponible'),
-                    'google_maps_url': place.get('googleMapsUri', 'Non disponible'),
-                    'phone': place.get('internationalPhoneNumber', 'Non disponible'),
+                    'website': place.get('websiteUri'), 
+                    'google_maps_url': place.get('googleMapsUri'),
+                    'phone': place.get('internationalPhoneNumber'),
                     'description': place.get('editorialSummary', {}).get('text'),
                     'opening_hours': place.get('regularOpeningHours', {}).get('weekdayDescriptions'),
-                    'price_level': place.get('priceLevel', "Non disponible"),
-                    'price_range': place.get('priceRange', "Non disponible"),
+                    'price_level': place.get('priceLevel'),
+                    'price_range': place.get('priceRange'),
                     'category': category_name
                 }
                 formatted_attractions.append(attraction)
@@ -255,7 +256,7 @@ async def get_tourist_attraction(place_id: str):
         logger.debug(f"GOOGLE | Réponse brute — place_id={place_id} data={place}")
 
         name = place.get('displayName', {}).get('text', 'Non spécifié')
-        address = place.get('formattedAddress', 'Non spécifiée')
+        address = place.get('formattedAddress', None)
 
         logger.debug(f"OPENAI | Génération description — name={name}")
         description = generate_description(name, full_address=address)
@@ -272,26 +273,31 @@ async def get_tourist_attraction(place_id: str):
                 photo_url = await download_and_store(place_id, google_url)
             else:
                 photo_url = None
-        # ──────────────────────────────────────────────────────
+        raw_rating = place.get('rating')
+        try:
+            rating = float(raw_rating) if raw_rating is not None else None
+        except (ValueError, TypeError):
+            rating = None
 
         attraction = {
             'name': name,
             'address': address,
-            'place_id': place.get('id', 'Non spécifié'),
+            'place_id': place.get('id', None),
             'latitude': place.get('location', {}).get('latitude'),
             'longitude': place.get('location', {}).get('longitude'),
-            'rating': place.get('rating', 'Non notée'),
+            'rating': rating,
             'user_ratings_total': place.get('userRatingCount', 0),
             'photo_urls': [photo_url] if photo_url else [],
-            'website': place.get('websiteUri', 'Non disponible'),
-            'google_maps_url': place.get('googleMapsUri', 'Non disponible'),
-            'phone': place.get('internationalPhoneNumber', 'Non disponible'),
+            'website': place.get('websiteUri', None),
+            'google_maps_url': place.get('googleMapsUri', None),
+            'phone': place.get('internationalPhoneNumber', None),
             'description': description,
             'opening_hours': place.get('regularOpeningHours', {}).get('weekdayDescriptions'),
-            'price_level': place.get('priceLevel', "Non disponible"),
-            'price_range': place.get('priceRange', "Non disponible"),
+            'price_level': place.get('priceLevel', None),
+            'price_range': place.get('priceRange', None),
             'category': AttractionCategory.autre.value
         }
+
         logger.info(f"GOOGLE | Attraction récupérée — name={name} place_id={place_id}")
         return {"attraction": attraction}
 

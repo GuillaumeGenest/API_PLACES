@@ -1,8 +1,9 @@
-from fastapi import APIRouter
-from fastapi.responses import PlainTextResponse
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import PlainTextResponse, JSONResponse
 from typing import Optional
 from app.services.photos_service import PhotosService
 from app.services.places_service import PlacesService
+from app.services.trip_service import generate_road_trip, generate_city_trip
 from app.core.exceptions import PlaceNotFoundError, ImageNotFoundError, PlaceIdMissingError
 from app.core.logger import setup_logger
 from datetime import date
