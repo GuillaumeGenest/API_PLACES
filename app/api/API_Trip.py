@@ -129,11 +129,11 @@ def generate_city_trip(ville: str, date_debut: str, date_fin: str):
 def generate_road_trip(city: str, date_start: str, date_end: str):
     try:
         # Vérification cohérence des dates
-        logger.info(f"TRIP | Génération road trip — ville={ville} du {date_debut} au {date_fin}")
+        logger.info(f"TRIP | Génération road trip — ville={city} du {date_start} au {date_end}")
         debut = datetime.strptime(date_start, "%Y-%m-%d")
         fin = datetime.strptime(date_end, "%Y-%m-%d")
         if debut > fin:
-            logger.warning(f"TRIP | Dates incohérentes — début={date_debut} fin={date_fin}")
+            logger.warning(f"TRIP | Dates incohérentes — début={date_start} fin={date_end}")
             raise HTTPException(
                 status_code=400, 
                 detail="La date de début doit être antérieure ou égale à la date de fin."
