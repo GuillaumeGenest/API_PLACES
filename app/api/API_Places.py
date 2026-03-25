@@ -9,10 +9,12 @@ from app.api.API_Photos import get_url_image_from_wikipedia, get_url_image_from_
 from app.api.API_Places_AI import generate_description
 from app.models.attraction import AttractionCategory
 from app.services.storage_service import is_stored, get_storage_url, download_and_store
+from app.services.supabase_service import get_attraction_by_place_id, save_attraction
+
 
 logger = setup_logger(__name__)
 
-load_dotenv()
+
 GOOGLE_API_KEY = get_api_key()
 
 def get_included_types(category: AttractionCategory) -> List[str]:
@@ -236,6 +238,15 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
 
 async def get_tourist_attraction(place_id: str):
     logger.info(f"GOOGLE | Récupération attraction — place_id={place_id}")
+
+    # ─── 1. Checker Supabase ──────────────────────────────────────
+    cached = get_attraction_by_place_id(place_id)
+    if cached:
+        logger.info(f"SUPABASE | ✅ Attraction trouvée — place_id={place_id}")
+        return {"attraction": cached}
+
+    # ─── 2. Cache miss → appeler Google API ──────────────────────
+    logger.info(f"SUPABASE | ❌ Attraction non trouvée — appel Google API — place_id={place_id}")
     url = f"https://places.googleapis.com/v1/places/{place_id}"
     fields = [
         "id", "displayName", "location", "formattedAddress",
@@ -273,6 +284,7 @@ async def get_tourist_attraction(place_id: str):
                 photo_url = await download_and_store(place_id, google_url)
             else:
                 photo_url = None
+
         raw_rating = place.get('rating')
         try:
             rating = float(raw_rating) if raw_rating is not None else None
@@ -297,6 +309,7 @@ async def get_tourist_attraction(place_id: str):
             'price_range': place.get('priceRange', None),
             'category': AttractionCategory.autre.value
         }
+        save_attraction(attraction)
 
         logger.info(f"GOOGLE | Attraction récupérée — name={name} place_id={place_id}")
         return {"attraction": attraction}

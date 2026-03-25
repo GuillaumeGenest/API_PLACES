@@ -24,6 +24,9 @@ jobs:
           GOOGLE_API_KEY_TEST: ${{ secrets.GOOGLE_API_KEY_TEST }}
           OPENAI_API_KEY_TEST: ${{ secrets.OPENAI_API_KEY_TEST }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY_TEST }}
+          SERVER_BASE_URL_TEST: "http://localhost"
+          SUPABASE_BASE_URL_TEST: "https://test.supabase.co"
+          SUPABASE_API_KEY_TEST: "test_key"
 
   build-and-push:
     needs: unit-tests

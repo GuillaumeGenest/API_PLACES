@@ -15,11 +15,7 @@ from app.api.API_Photos import get_url_image_from_wikipedia, get_url_image_from_
 
 logger = setup_logger(__name__)
 
-load_dotenv()
-OPENAI_API_KEY = get_openai_key()
-
-client = OpenAI()
-
+client = OpenAI(api_key=get_openai_key())
 
 def generate_attraction(
     place_name: str,
