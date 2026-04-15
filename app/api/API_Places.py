@@ -1,4 +1,5 @@
-import requests
+import httpx
+import uuid
 import os
 from dotenv import load_dotenv
 from enum import Enum
@@ -11,9 +12,7 @@ from app.models.attraction import AttractionCategory
 from app.services.storage_service import is_stored, get_storage_url, download_and_store
 from app.services.supabase_service import get_attraction_by_place_id, save_attraction
 
-
 logger = setup_logger(__name__)
-
 
 GOOGLE_API_KEY = get_api_key()
 
@@ -26,17 +25,18 @@ def get_included_types(category: AttractionCategory) -> List[str]:
     return category_types[category]
 
 
-def get_city_coordinates(city_name):
+async def get_city_coordinates(city_name):
     logger.info(f"GOOGLE | Recherche coordonnées — city={city_name}")
     try:
-        response = requests.get(
-            "https://maps.googleapis.com/maps/api/geocode/json",
-            params={
-            "address": city_name,
-            "key": GOOGLE_API_KEY,
-            "language": "fr"
-            }
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://maps.googleapis.com/maps/api/geocode/json",
+                params={
+                    "address": city_name,
+                    "key": GOOGLE_API_KEY,
+                    "language": "fr"
+                }
+            )
         data = response.json()
         if data['results']:
             location = data['results'][0]['geometry']['location']
@@ -46,19 +46,30 @@ def get_city_coordinates(city_name):
         else:
             logger.warning(f"GOOGLE | Aucune coordonnée trouvée — city={city_name}")
             return None
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPError as e:
         logger.error(f"GOOGLE | Erreur get_city_coordinates — city={city_name} error={e}")
         return None
 
 
-def get_place_id_text_search_essentials(name, address=None):
+def format_price_range(price_range):
+    if not price_range:
+        return None
+    start = price_range.get("startPrice", {}).get("units")
+    end = price_range.get("endPrice", {}).get("units")
+    if start is not None and end is not None:
+        return f"{start} - {end}"
+    return None
+
+
+async def get_place_id_text_search_essentials(name, address=None):
     query = f"{name}, {address}" if address else name
     logger.info(f"GOOGLE | Recherche place_id (legacy) — query={query}")
     try:
-        response = requests.get(
-            "https://maps.googleapis.com/maps/api/place/findplacefromtext/json",
-            params={"input": query, "inputtype": "textquery", "key": GOOGLE_API_KEY}
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://maps.googleapis.com/maps/api/place/findplacefromtext/json",
+                params={"input": query, "inputtype": "textquery", "key": GOOGLE_API_KEY}
+            )
         data = response.json()
         if 'candidates' in data and data['candidates']:
             place_id = data['candidates'][0]['place_id']
@@ -66,12 +77,12 @@ def get_place_id_text_search_essentials(name, address=None):
             return place_id
         logger.warning(f"GOOGLE | Aucun place_id trouvé — query={query}")
         return None
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPError as e:
         logger.error(f"GOOGLE | Erreur get_place_id_text_search_essentials — query={query} error={e}")
         return None
 
 
-def get_place_id(name, address=None):
+async def get_place_id(name, address=None):
     query = f"{name}, {address}" if address else name
     logger.info(f"GOOGLE | Recherche place_id — query={query}")
     url = "https://places.googleapis.com/v1/places:searchText"
@@ -81,7 +92,8 @@ def get_place_id(name, address=None):
         "X-Goog-FieldMask": "places.id"
     }
     try:
-        response = requests.post(url, json={"textQuery": query}, headers=headers)
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json={"textQuery": query}, headers=headers)
         if response.status_code != 200:
             logger.error(f"GOOGLE | Erreur API place_id — query={query} status={response.status_code}")
             return None
@@ -92,12 +104,12 @@ def get_place_id(name, address=None):
             return place_id
         logger.warning(f"GOOGLE | Aucun place_id trouvé — query={query}")
         return None
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPError as e:
         logger.error(f"GOOGLE | Erreur get_place_id — query={query} error={e}")
         return None
 
 
-def get_place_name(name, address=None):
+async def get_place_name(name, address=None):
     query = f"{name}, {address}" if address else name
     logger.info(f"GOOGLE | Recherche place_name — query={query}")
     url = "https://places.googleapis.com/v1/places:searchText"
@@ -107,7 +119,8 @@ def get_place_name(name, address=None):
         "X-Goog-FieldMask": "places.name"
     }
     try:
-        response = requests.post(url, json={"textQuery": query}, headers=headers)
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json={"textQuery": query}, headers=headers)
         if response.status_code != 200:
             logger.error(f"GOOGLE | Erreur API place_name — query={query} status={response.status_code}")
             return None
@@ -118,54 +131,56 @@ def get_place_name(name, address=None):
             return place_name
         logger.warning(f"GOOGLE | Aucun place_name trouvé — query={query}")
         return None
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPError as e:
         logger.error(f"GOOGLE | Erreur get_place_name — query={query} error={e}")
         return None
 
 
-def get_place_id_from_coordinates(lat, lng):
+async def get_place_id_from_coordinates(lat, lng):
     logger.info(f"GOOGLE | Recherche place_id depuis coordonnées — lat={lat} lng={lng}")
     try:
-        response = requests.get(
-            "https://maps.googleapis.com/maps/api/geocode/json",
-            params={"latlng": f"{lat},{lng}", "key": GOOGLE_API_KEY}
-        )
-        response.raise_for_status()
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://maps.googleapis.com/maps/api/geocode/json",
+                params={"latlng": f"{lat},{lng}", "key": GOOGLE_API_KEY}
+            )
         data = response.json()
         if data['status'] == 'OK' and len(data['results']) > 0:
             place_id = data['results'][0].get('place_id')
             if place_id:
                 logger.info(f"GOOGLE | place_id trouvé depuis coordonnées — lat={lat} lng={lng} place_id={place_id}")
                 return place_id
-            logger.warning(f"GOOGLE | Aucun place_id dans la réponse — lat={lat} lng={lng}")
-            return None
-        logger.warning(f"GOOGLE | Erreur réponse API — status={data['status']} lat={lat} lng={lng}")
+        logger.warning(f"GOOGLE | Aucun place_id trouvé — lat={lat} lng={lng}")
         return None
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPError as e:
         logger.error(f"GOOGLE | Erreur get_place_id_from_coordinates — lat={lat} lng={lng} error={e}")
         return None
 
 
-def get_representative_place_id(city_name):
+async def get_representative_place_id(city_name):
     logger.info(f"GOOGLE | Recherche place_id représentatif — city={city_name}")
     try:
-        response = requests.get(
-            "https://maps.googleapis.com/maps/api/place/textsearch/json",
-            params={"query": f"attractions à visiter à {city_name}", "key": GOOGLE_API_KEY, "language": "fr"}
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://maps.googleapis.com/maps/api/place/textsearch/json",
+                params={
+                    "query": f"attractions à visiter à {city_name}",
+                    "key": GOOGLE_API_KEY,
+                    "language": "fr"
+                }
+            )
         data = response.json()
         if "results" in data and data["results"]:
             place_id = data["results"][0]["place_id"]
             logger.info(f"GOOGLE | place_id représentatif trouvé — city={city_name} place_id={place_id}")
             return place_id
-        logger.warning(f"GOOGLE | Aucun résultat représentatif — city={city_name}")
         return None
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPError as e:
         logger.error(f"GOOGLE | Erreur get_representative_place_id — city={city_name} error={e}")
         return None
 
 
-def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radius=5000):
+async def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radius=5000):
     logger.info(f"GOOGLE | Recherche attractions — lat={lat} lng={lng} category={category.value} radius={radius}")
     url = "https://places.googleapis.com/v1/places:searchNearby"
     fields = [
@@ -191,8 +206,9 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
     }
     logger.debug(f"GOOGLE | Payload envoyé — {payload}")
     try:
-        response = requests.post(url, headers=headers, json=payload)
-        response.raise_for_status()
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
         data = response.json()
         formatted_attractions = []
 
@@ -203,8 +219,9 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
                 name = place.get('displayName', {}).get('text', 'Non spécifié')
                 address = place.get('formattedAddress', 'Non spécifiée')
                 logger.debug(f"WIKIPEDIA | Recherche image — name={name}")
-                photo_url = get_url_image_from_wikipedia(f"{name} {address}")
+                photo_url = await get_url_image_from_wikipedia(f"{name} {address}")
                 attraction = {
+                    'id': str(uuid.uuid4()),
                     'name': name,
                     'address': address,
                     'place_id': place.get('id'),
@@ -213,13 +230,13 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
                     'rating': place.get('rating'),
                     'user_ratings_total': place.get('userRatingCount', 0),
                     'photo_urls': [photo_url] if photo_url else [],
-                    'website': place.get('websiteUri'), 
+                    'website': place.get('websiteUri'),
                     'google_maps_url': place.get('googleMapsUri'),
                     'phone': place.get('internationalPhoneNumber'),
                     'description': place.get('editorialSummary', {}).get('text'),
                     'opening_hours': place.get('regularOpeningHours', {}).get('weekdayDescriptions'),
                     'price_level': place.get('priceLevel'),
-                    'price_range': place.get('priceRange'),
+                    'price_range': format_price_range(place.get('priceRange')),
                     'category': category_name
                 }
                 formatted_attractions.append(attraction)
@@ -228,11 +245,8 @@ def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory, radiu
 
         return {"attraction": formatted_attractions}
 
-    except requests.exceptions.HTTPError as e:
-        logger.error(f"GOOGLE | Erreur HTTP get_tourist_attractions_nearby — status={response.status_code} error={e}")
-        return {"attraction": []}
-    except requests.exceptions.RequestException as e:
-        logger.error(f"GOOGLE | Erreur get_tourist_attractions_nearby — error={e}")
+    except httpx.HTTPError as e:
+        logger.error(f"GOOGLE | Erreur HTTP get_tourist_attractions_nearby — error={e}")
         return {"attraction": []}
 
 
@@ -261,8 +275,9 @@ async def get_tourist_attraction(place_id: str):
         "Accept-Language": "fr"
     }
     try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
         place = response.json()
         logger.debug(f"GOOGLE | Réponse brute — place_id={place_id} data={place}")
 
@@ -270,7 +285,7 @@ async def get_tourist_attraction(place_id: str):
         address = place.get('formattedAddress', None)
 
         logger.debug(f"OPENAI | Génération description — name={name}")
-        description = generate_description(name, full_address=address)
+        description = await generate_description(name, full_address=address)
 
         # ─── Photo avec cache ─────────────────────────────────
         logger.debug(f"GOOGLE | Récupération photo — place_id={place_id}")
@@ -279,7 +294,7 @@ async def get_tourist_attraction(place_id: str):
             logger.info(f"STORAGE | ✅ Cache hit — place_id={place_id}")
         else:
             logger.info(f"STORAGE | ❌ Cache miss — appel Google Photos — place_id={place_id}")
-            google_url = get_url_image_from_google(place_id)
+            google_url = await get_url_image_from_google(place_id)
             if google_url:
                 photo_url = await download_and_store(place_id, google_url)
             else:
@@ -292,6 +307,7 @@ async def get_tourist_attraction(place_id: str):
             rating = None
 
         attraction = {
+            'id': str(uuid.uuid4()),
             'name': name,
             'address': address,
             'place_id': place.get('id', None),
@@ -306,7 +322,7 @@ async def get_tourist_attraction(place_id: str):
             'description': description,
             'opening_hours': place.get('regularOpeningHours', {}).get('weekdayDescriptions'),
             'price_level': place.get('priceLevel', None),
-            'price_range': place.get('priceRange', None),
+            'price_range': format_price_range(place.get('priceRange')),
             'category': AttractionCategory.autre.value
         }
         save_attraction(attraction)
@@ -314,6 +330,6 @@ async def get_tourist_attraction(place_id: str):
         logger.info(f"GOOGLE | Attraction récupérée — name={name} place_id={place_id}")
         return {"attraction": attraction}
 
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPError as e:
         logger.error(f"GOOGLE | Erreur get_tourist_attraction — place_id={place_id} error={e}")
         return None

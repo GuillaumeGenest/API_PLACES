@@ -35,3 +35,4 @@ mocked_openai.py
 routes.py
 test/
 images/storage/caches/
+commandes.md

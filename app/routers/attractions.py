@@ -6,43 +6,38 @@ from app.core.exceptions import PlaceNotFoundError, AttractionNotFoundError
 from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
-
 router = APIRouter(prefix="/attractions", tags=["Attractions"])
 
+
 @router.get("/")
-def get_attractions(city_name: str, category: AttractionCategory):
+async def get_attractions(city_name: str, category: AttractionCategory):
     logger.info(f"HTTP | GET /attractions — city={city_name} category={category.value}")
     service = PlacesService()
-
-    coordinates = service.get_city_coordinates(city_name)
+    coordinates = await service.get_city_coordinates(city_name)
     if not coordinates:
         logger.warning(f"HTTP | GET /attractions — ville introuvable city={city_name}")
         raise PlaceNotFoundError(city_name)
-
-    attractions = service.get_tourist_attractions_nearby(
+    attractions = await service.get_tourist_attractions_nearby(
         coordinates[0], coordinates[1], category
     )
     if not attractions:
         logger.error(f"HTTP | GET /attractions — aucune attraction city={city_name} category={category.value}")
         raise AttractionNotFoundError()
-
     logger.info(f"HTTP | GET /attractions — succès city={city_name} category={category.value}")
     return JSONResponse(content=attractions)
 
 
 @router.get("/by_coordinates")
-def get_attractions_by_coordinates(
+async def get_attractions_by_coordinates(
     latitude: float,
     longitude: float,
     category: AttractionCategory
 ):
     logger.info(f"HTTP | GET /attractions/by_coordinates — lat={latitude} lng={longitude} category={category.value}")
     service = PlacesService()
-
-    attractions = service.get_tourist_attractions_nearby(latitude, longitude, category)
+    attractions = await service.get_tourist_attractions_nearby(latitude, longitude, category)
     if not attractions:
         logger.error(f"HTTP | GET /attractions/by_coordinates — aucune attraction lat={latitude} lng={longitude}")
         raise AttractionNotFoundError()
-
     logger.info(f"HTTP | GET /attractions/by_coordinates — succès lat={latitude} lng={longitude} category={category.value}")
     return JSONResponse(content=attractions)
