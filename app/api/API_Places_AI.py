@@ -1,11 +1,10 @@
-import requests
 import os
 from dotenv import load_dotenv
 from enum import Enum
 from typing import List, Optional
 from app.core.config import *
 from app.core.logger import setup_logger
-from openai import OpenAI
+from openai import AsyncOpenAI
 from datetime import datetime
 import json
 from fastapi.responses import JSONResponse
@@ -15,9 +14,9 @@ from app.api.API_Photos import get_url_image_from_wikipedia, get_url_image_from_
 
 logger = setup_logger(__name__)
 
-client = OpenAI(api_key=get_openai_key())
+client = AsyncOpenAI(api_key=get_openai_key())
 
-def generate_attraction(
+async def generate_attraction(
     place_name: str,
     full_address: Optional[str] = None,
     category_name: str = "autre"
@@ -56,7 +55,7 @@ Règles :
 """
 
         logger.debug(f"OPENAI | Appel API — modèle=gpt-4.1-mini query={full_query}")
-        response = client.responses.create(
+        response = await client.responses.create(
             model="gpt-4.1-mini",
             input=[
                 {
@@ -80,12 +79,10 @@ Règles :
 
         formatted_attractions = []
         for place in data.get("attraction", []):
-            opening_hours = place.get("opening_hours")
-            if not isinstance(opening_hours, list):
-                opening_hours = None
-
             logger.debug(f"WIKIPEDIA | Recherche image — name={place.get('name', place_name)}")
-            photo_url = get_url_image_from_wikipedia(place.get("name", place_name))
+            photo_url = await get_url_image_from_wikipedia(place.get("name", place_name))
+
+            opening_hours = place.get('opening_hours', [])
 
             attraction = {
                 'name': place.get('name', 'Non spécifié'),
@@ -116,7 +113,7 @@ Règles :
         return None
 
 
-def generate_description(
+async def generate_description(
     place_name: str,
     full_address: Optional[str] = None
 ) -> Optional[str]:
@@ -131,7 +128,7 @@ Retourne UNIQUEMENT la description en texte, sans JSON ni explication supplémen
 """
 
         logger.debug(f"OPENAI | Appel API — modèle=gpt-4.1-mini query={full_query}")
-        response = client.responses.create(
+        response = await client.responses.create(
             model="gpt-4.1-mini",
             input=[
                 {"role": "system", "content": "Tu es un assistant spécialisé en tourisme."},

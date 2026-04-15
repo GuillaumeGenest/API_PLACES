@@ -73,6 +73,15 @@ prod: check-env
 test-unit: check-env
 	ENVIRONMENT=development pytest tests/unit/ -v
 
+# ─── Tests ciblés ────────────────────────────────────────────────
+# Usage : make test-file FILE=tests/unit/test_routes_trips.py
+test-file: check-env
+	ENVIRONMENT=development pytest $(FILE) -v
+
+# Usage : make test-one TEST=tests/unit/test_routes_trips.py::TestCityTrip::test_city_trip_success
+test-one: check-env
+	ENVIRONMENT=development pytest $(TEST) -v
+
 # ─── Seeds countries ─────────────────────────────────────────────
 country ?=
 

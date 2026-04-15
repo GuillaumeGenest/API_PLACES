@@ -5,15 +5,13 @@ from app.core.exceptions import DescriptionNotFoundError
 from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
-
 router = APIRouter(prefix="/descriptions", tags=["Descriptions"])
 
 @router.get("/")
-def get_description(place_name: str, address: Optional[str] = None):
+async def get_description(place_name: str, address: Optional[str] = None):
     logger.info(f"HTTP | GET /descriptions — place={place_name} address={address}")
     service = AIService()
-
-    description = service.generate_description(place_name, address)
+    description = await service.generate_description(place_name, address)
     if not description:
         logger.error(f"HTTP | GET /descriptions — échec génération place={place_name}")
         raise DescriptionNotFoundError()

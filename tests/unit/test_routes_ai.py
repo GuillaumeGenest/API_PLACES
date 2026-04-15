@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import unittest
 from fastapi.testclient import TestClient
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 from app.main import app
 
 
@@ -16,7 +16,7 @@ class TestGetAIAttraction(unittest.TestCase):
     def test_get_ai_attraction_success(self):
         with patch('app.routers.ai.AIService') as MockService:
             instance = MockService.return_value
-            instance.generate_attraction.return_value = {
+            instance.generate_attraction = AsyncMock(return_value={
                 "attraction": [{
                     "name": "Tour Eiffel",
                     "address": "Paris",
@@ -33,7 +33,7 @@ class TestGetAIAttraction(unittest.TestCase):
                     "opening_hours": ["Lundi: 09:00 - 23:00"],
                     "category": "touristique"
                 }]
-            }
+            })
             response = self.client.get("/ai/attraction?place_name=Tour+Eiffel&address=Paris&category=touristique")
             self.assertEqual(response.status_code, 200)
             self.assertIn("attraction", response.json())
@@ -41,7 +41,7 @@ class TestGetAIAttraction(unittest.TestCase):
     def test_get_ai_attraction_failure(self):
         with patch('app.routers.ai.AIService') as MockService:
             instance = MockService.return_value
-            instance.generate_attraction.return_value = None
+            instance.generate_attraction = AsyncMock(return_value=None)
             response = self.client.get("/ai/attraction?place_name=LieuInexistant")
             self.assertEqual(response.status_code, 400)
             self.assertIn("AI_GENERATION_ERROR", response.json()["error"])

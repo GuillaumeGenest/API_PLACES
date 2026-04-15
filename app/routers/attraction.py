@@ -5,14 +5,14 @@ from app.core.exceptions import PlaceNotFoundError, AttractionNotFoundError
 from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
-
 router = APIRouter(prefix="/attraction", tags=["Attraction"])
+
 
 @router.get("/by_name")
 async def get_attraction_by_name(place_name: str, address: str):
     logger.info(f"HTTP | GET /attraction/by_name — place={place_name} address={address}")
     service = PlacesService()
-    place_id = service.get_place_id(place_name, address)
+    place_id = await service.get_place_id(place_name, address)
     if not place_id:
         logger.warning(f"HTTP | GET /attraction/by_name — place_id introuvable place={place_name}")
         raise PlaceNotFoundError(place_name)
@@ -28,7 +28,7 @@ async def get_attraction_by_name(place_name: str, address: str):
 async def get_attraction_by_coordinates(latitude: float, longitude: float):
     logger.info(f"HTTP | GET /attraction/by_coordinates — lat={latitude} lng={longitude}")
     service = PlacesService()
-    place_id = service.get_place_id_from_coordinates(latitude, longitude)
+    place_id = await service.get_place_id_from_coordinates(latitude, longitude)
     if not place_id:
         logger.warning(f"HTTP | GET /attraction/by_coordinates — place_id introuvable lat={latitude} lng={longitude}")
         raise PlaceNotFoundError(f"{latitude} - {longitude}")

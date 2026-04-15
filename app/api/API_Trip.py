@@ -6,6 +6,7 @@ from enum import Enum
 from typing import List, Optional
 from app.core.config import *
 from openai import OpenAI
+from openai import AsyncOpenAI
 from datetime import datetime
 import json
 from fastapi.responses import JSONResponse
@@ -18,7 +19,7 @@ from app.api.API_Photos import get_url_image_from_wikipedia, get_url_image_from_
 from app.core.logger import setup_logger
 logger = setup_logger(__name__)
 
-client = OpenAI(api_key=get_openai_key())
+client = AsyncOpenAI(api_key=get_openai_key())
 
 
 #def lieux_a_visiter(
@@ -26,7 +27,7 @@ client = OpenAI(api_key=get_openai_key())
 #    date_debut: str = Query(..., description="Date de début au format YYYY-MM-DD"),
 #    date_fin: str = Query(..., description="Date de fin au format YYYY-MM-DD")
 #):
-def generate_city_trip(ville: str, date_debut: str, date_fin: str):
+async def generate_city_trip(ville: str, date_debut: str, date_fin: str):
     try:
         # Vérification cohérence des dates
         logger.info(f"TRIP | Génération city trip — ville={ville} du {date_debut} au {date_fin}")
@@ -59,7 +60,7 @@ def generate_city_trip(ville: str, date_debut: str, date_fin: str):
             f'Le format de réponse doit être uniquement au format JSON, avec une clé principale : "lieux".'
         )
         
-        response = client.responses.create(
+        response = await client.responses.create(
             model="gpt-4.1-mini",
             input=[
                 {
@@ -123,7 +124,7 @@ def generate_city_trip(ville: str, date_debut: str, date_fin: str):
 #    date_fin: str = Query(..., description="Date de fin au format YYYY-MM-DD")
 #):
 
-def generate_road_trip(city: str, date_start: str, date_end: str):
+async def generate_road_trip(city: str, date_start: str, date_end: str):
     try:
         # Vérification cohérence des dates
         logger.info(f"TRIP | Génération road trip — ville={city} du {date_start} au {date_end}")
@@ -155,7 +156,7 @@ def generate_road_trip(city: str, date_start: str, date_end: str):
             f'Le format de réponse doit être uniquement au format JSON, avec les deux clés principales : "villes" et "lieux".'
         )
 
-        response = client.responses.create(
+        response = await client.responses.create(
             model="gpt-4.1-mini",
             input=[
                 {

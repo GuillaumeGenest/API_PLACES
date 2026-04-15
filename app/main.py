@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from app.core.logger import setup_logger
 from app.core.exceptions import add_exception_handlers
-from app.routers import attractions, attraction, images, descriptions, ai, trips, countries_info
+from app.routers import attractions, attraction, images, descriptions, ai, trips, countries_info, users
 import time
 import os
 
@@ -44,3 +44,4 @@ app.include_router(descriptions.router)
 app.include_router(ai.router)
 app.include_router(trips.router)
 app.include_router(countries_info.router)
+app.include_router(users.router)

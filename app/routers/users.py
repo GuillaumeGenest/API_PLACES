@@ -1,6 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, Header, status
-from app.supabase_service import _client
-from app.supabase_admin import _admin_client
 from app.services.supabase_service import get_user_from_token, delete_user
 from app.core.logger import setup_logger
 logger = setup_logger(__name__)
