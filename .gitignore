@@ -36,4 +36,3 @@ routes.py
 test/
 images/storage/caches/
 commandes.md
-seeds/countries/model.json

@@ -7,33 +7,27 @@
   "currency_symbol": "€",
   "phone_code": "+39",
   "utc_offset": 1,
-
-  "visa": "Les citoyens de l'Union européenne peuvent entrer librement en Italie. Les ressortissants de nombreux pays peuvent séjourner jusqu'à 90 jours sans visa dans l'espace Schengen.",
-
-  "climate": "Climat méditerranéen au sud (étés chauds) et continental au nord (hivers froids). Étés chauds (25–35 °C), hivers doux à froids.",
-
-  "religion": "Majoritairement catholique, avec une influence culturelle importante.",
-
+  "visa": "Les citoyens de l'Union européenne peuvent entrer, vivre et travailler librement en Italie. Les ressortissants de nombreux pays (États-Unis, Canada, Australie, etc.) peuvent séjourner jusqu'à 90 jours sans visa dans l'espace Schengen pour le tourisme. Un passeport ou une carte d'identité valide est requis. À partir de 2025, le système ETIAS sera obligatoire pour les ressortissants de pays tiers exemptés de visa. Pour les séjours longs (travail, études), un visa national et un permis de séjour (permesso di soggiorno) sont nécessaires.",
+  "climate": "Climat très varié selon les régions. Le nord (Milan, Turin) est continental avec des hivers froids et neigeux et des étés chauds et orageux. Le centre (Rome, Florence) est méditerranéen tempéré. Le sud et les îles (Sicile, Sardaigne) bénéficient de longues saisons chaudes (30–38 °C) et d'hivers doux. Les Alpes et les Dolomites offrent des conditions de montagne toute l'année. Prévoir des vêtements légers en été dans le sud, des couches chaudes au nord en hiver.",
+  "religion": "Pays à tradition catholique romaine profonde (environ 70 % se déclarent catholiques, pratique en déclin). La présence du Vatican à Rome confère à l'Italie un rôle spirituel mondial. Les fêtes religieuses catholiques (Noël, Pâques, Assomption, Toussaint) sont des jours fériés nationaux. Minorités protestantes, juives et musulmanes présentes dans les grandes villes.",
   "culinary_customs": [
-    "Cuisine régionale très variée.",
-    "Pâtes et pizzas emblématiques.",
-    "Repas en plusieurs plats.",
-    "Espresso consommé debout au bar.",
-    "Dîner tardif.",
-    "Produits frais privilégiés.",
-    "Vin très présent aux repas."
+    "Pizza : née à Naples, la pizza italienne (pâte fine, tomates San Marzano, mozzarella di bufala) est protégée par une appellation UNESCO. Consommée dans les pizzerie à toute occasion, elle est un symbole culturel mondial.",
+    "Pasta : plus de 300 formes de pâtes différentes, chaque région ayant ses spécialités (carbonara à Rome, pesto à Gênes, bolognaise en Émilie, amatriciana dans le Latium). Les Italiens sont très stricts sur l'authenticité des recettes.",
+    "Gelato : glace artisanale italienne à base de lait ou de fruits, plus dense et crémeuse que les glaces industrielles. Dégustée dans les gelaterie artisanali en toutes saisons, c'est un rituel social quotidien.",
+    "L'espresso est la boisson nationale absolue : serré, chaud, consommé debout au comptoir du bar en quelques secondes. Un cappuccino ne se boit qu'au petit-déjeuner, jamais après un repas.",
+    "Les repas italiens sont des rituels sociaux longs et structurés : antipasto, primo (pâtes ou risotto), secondo (viande ou poisson), contorno (légume), dolce. Le dîner commence rarement avant 20h.",
+    "L'apéritivo est une institution sociale, notamment à Milan (Spritz, Negroni accompagnés de petites portions de nourriture), pratiqué entre 18h et 20h avant le dîner.",
+    "La gastronomie varie énormément selon les régions. Chaque ville, chaque village a ses recettes protégées et sa fierté culinaire locale. Dire qu'un plat régional est meilleur ailleurs est une faute."
   ],
-
   "social_customs": [
-    "Communication expressive.",
-    "Gestuelle importante.",
-    "Contact physique fréquent.",
-    "Ponctualité flexible.",
-    "Importance de la famille.",
-    "Style vestimentaire soigné.",
-    "Respect des traditions locales."
+    "Les Italiens sont expressifs, chaleureux et très tactiles. Les deux bises sur les joues sont la salutation standard entre personnes qui se connaissent. Les gestes accompagnent systématiquement la parole.",
+    "La bella figura (faire bonne impression) est une valeur culturelle fondamentale. L'apparence, la tenue vestimentaire et la présentation de soi sont très importantes dans tous les contextes.",
+    "La famille (la famiglia) est au cœur de la société italienne. Les repas du dimanche en famille, les fêtes et les baptêmes sont des moments sacrés réunissant toute la famille élargie.",
+    "La ponctualité est relative, notamment dans les contextes sociaux au sud du pays. Dans les contextes professionnels, notamment au nord, elle est plus attendue.",
+    "Le vouvoiement (Lei) est de mise avec les inconnus, les personnes plus âgées et dans les contextes formels. Le tutoiement (tu) est très répandu entre jeunes et dans les contextes décontractés.",
+    "Lors de la visite d'églises, une tenue correcte est impérative : épaules et genoux couverts. Les tenues de plage dans les centres-villes ou les sites religieux sont très mal perçues.",
+    "Les Italiens sont très fiers de leur art, de leur architecture et de leur gastronomie. Critiquer ces aspects ou ne pas s'y intéresser peut créer un malaise. Montrer de l'admiration est toujours bien accueilli."
   ],
-
   "politeness_phrases": {
     "bonjour": "Ciao",
     "bonjour (formel)": "Buongiorno",
@@ -48,30 +42,29 @@
     "de rien": "Prego",
     "s'il vous plaît": "Per favore",
     "s'il te plaît": "Per favore",
-    "excusez-moi": "Mi scusi",
+    "excusez-moi": "Scusi",
     "pardon": "Scusa",
     "désolé": "Mi dispiace",
     "oui": "Sì",
     "non": "No",
-    "comment ca va ?": "Come stai?",
+    "comment ca va ?": "Come sta? / Come stai?",
     "je ne comprends pas": "Non capisco",
     "pouvez-vous répéter ?": "Può ripetere?",
-    "parlez plus lentement": "Parli più lentamente",
+    "parlez plus lentement": "Parli più lentamente, per favore",
     "parlez-vous anglais ?": "Parla inglese?",
-    "où sont les toilettes ?": "Dov'è il bagno?",
+    "où sont les toilettes ?": "Dove sono i bagni?",
     "combien ça coûte ?": "Quanto costa?",
     "je voudrais ça": "Vorrei questo",
-    "aidez-moi s'il vous plaît": "Aiutami",
-    "bonne chance": "Buona fortuna",
+    "aidez-moi s'il vous plaît": "Mi aiuti, per favore",
+    "bonne chance": "Buona fortuna / In bocca al lupo",
     "félicitations": "Congratulazioni",
-    "santé !": "Salute!"
+    "santé !": "Salute! / Cin cin!"
   },
-
   "basic_vocabulary": {
     "oui": "Sì",
     "non": "No",
     "peut-être": "Forse",
-    "d'accord": "Va bene",
+    "d'accord": "Va bene / OK",
     "combien": "Quanto",
     "où": "Dove",
     "quand": "Quando",
@@ -80,7 +73,7 @@
     "qui": "Chi",
     "quoi": "Cosa",
     "ici": "Qui",
-    "là-bas": "Lì",
+    "là-bas": "Là",
     "gauche": "Sinistra",
     "droite": "Destra",
     "tout droit": "Dritto",
@@ -90,7 +83,7 @@
     "cher": "Caro",
     "pas cher": "Economico",
     "payer": "Pagare",
-    "carte bancaire": "Carta",
+    "carte bancaire": "Carta di credito",
     "espèces": "Contanti",
     "eau": "Acqua",
     "pain": "Pane",
@@ -100,10 +93,10 @@
     "boisson": "Bevanda",
     "bière": "Birra",
     "vin": "Vino",
-    "hôtel": "Hotel",
+    "hôtel": "Hotel / Albergo",
     "réservation": "Prenotazione",
     "clé": "Chiave",
-    "gare": "Stazione",
+    "gare": "Stazione ferroviaria",
     "aéroport": "Aeroporto",
     "taxi": "Taxi",
     "bus": "Autobus",
@@ -118,7 +111,6 @@
     "police": "Polizia",
     "ambulance": "Ambulanza"
   },
-
   "numbers": {
     "0": "Zero",
     "1": "Uno",
@@ -142,7 +134,6 @@
     "demain": "Domani",
     "hier": "Ieri"
   },
-
   "emergency_numbers": {
     "general": "112",
     "police": "113",

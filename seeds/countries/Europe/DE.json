@@ -7,29 +7,27 @@
   "currency_symbol": "€",
   "phone_code": "+49",
   "utc_offset": 1,
-  "visa": "Les citoyens de l'Union européenne peuvent entrer et séjourner librement en Allemagne. Les ressortissants de nombreux pays (États-Unis, Canada, Royaume-Uni, etc.) peuvent séjourner jusqu'à 90 jours sans visa dans l'espace Schengen. Un passeport valide est requis. Pour les séjours longs, un permis de résidence est nécessaire.",
-  "climate": "Climat tempéré avec influence océanique à l'ouest et continentale à l'est. Étés modérément chauds (20–30 °C) et hivers froids (0 à -5 °C selon les régions). Les précipitations sont réparties toute l'année.",
-  "religion": "Majoritairement chrétienne (catholique et protestante), avec une part importante de population non religieuse et des minorités musulmanes et autres religions.",
+  "visa": "Les citoyens de l'Union européenne peuvent entrer, vivre et travailler librement en Allemagne. Les ressortissants de nombreux pays (États-Unis, Canada, Australie, etc.) peuvent séjourner jusqu'à 90 jours sans visa dans l'espace Schengen pour le tourisme. Un passeport ou une carte d'identité valide est requis. À partir de 2025, le système ETIAS sera obligatoire pour les ressortissants de pays tiers exemptés de visa. Pour les séjours longs (travail, études), un visa national et un titre de séjour délivré par l'Ausländerbehörde sont nécessaires.",
+  "climate": "Climat océanique tempéré à continental selon les régions. Étés doux à chauds (20–28 °C, avec épisodes caniculaires possibles), hivers froids avec neige possible (−2 à 5 °C). Le nord est plus doux et humide, le sud (Bavière) plus froid en hiver. Le printemps et l'automne sont agréables mais pluvieux. Prévoir un imperméable en toutes saisons, des vêtements chauds en hiver et des tenues légères en été.",
+  "religion": "Pays pluriconfessionnel : catholiques romains (environ 27 %) et protestants luthériens (25 %) en proportions proches, avec une part croissante de sans-religion (plus de 40 %). Importante communauté musulmane dans les grandes villes. Les fêtes religieuses chrétiennes (Noël, Pâques) sont des jours fériés nationaux.",
   "culinary_customs": [
-    "Bratwurst : saucisses grillées très populaires, souvent servies avec pain ou pommes de terre.",
-    "Schnitzel : escalope panée traditionnelle, souvent accompagnée de pommes de terre.",
-    "Bretzel : pain salé emblématique, consommé en snack.",
-    "La bière fait partie intégrante de la culture allemande, notamment en Bavière.",
-    "Les repas du soir sont souvent légers (pain, fromage, charcuterie).",
-    "Les marchés de Noël proposent de nombreuses spécialités traditionnelles.",
-    "Les plats sont souvent riches et consistants."
+    "Bratwurst : saucisse grillée à la moutarde, consommée dans les marchés, les stades et les fêtes de rue. Emblème de la culture culinaire populaire allemande, chaque région ayant sa propre variante.",
+    "Pretzel (Brezel) : pain en forme de nœud, croustillant dehors et moelleux dedans, saupoudré de gros sel. Accompagnement incontournable de la bière dans les brasseries bavaroises.",
+    "Sauerkraut et choucroute : chou fermenté servi en accompagnement de saucisses ou de porc. Plat traditionnel d'Allemagne du Sud et d'Alsace, très présent dans la gastronomie hivernale.",
+    "L'Oktoberfest et la culture de la bière (Bierkultur) sont des éléments identitaires forts. La bière est souvent servie dans des chopes d'un litre (Maß) et accompagne toujours un repas.",
+    "Le pain (Brot) est central dans la culture alimentaire allemande : plus de 3 000 variétés recensées, souvent à base de seigle ou de grains entiers, consommé à chaque repas.",
+    "Les marchés de Noël (Weihnachtsmärkte) sont une institution culturelle proposant vin chaud (Glühwein), pain d'épices (Lebkuchen) et nombreuses spécialités saisonnières.",
+    "Les repas sont souvent pris à heures fixes. Le dîner (Abendessen) est traditionnellement froid (pain, charcuterie, fromage) tandis que le déjeuner est le repas chaud principal."
   ],
-
   "social_customs": [
-    "La ponctualité est extrêmement importante en Allemagne.",
-    "La communication est directe et factuelle.",
-    "Le respect des règles et de l'ordre est essentiel.",
-    "Les déchets sont triés de manière très stricte.",
-    "Les relations professionnelles sont formelles.",
-    "La vie privée est très respectée.",
-    "Les interactions sociales peuvent sembler réservées au début."
+    "Les Allemands accordent une grande importance à la ponctualité. Arriver en retard sans prévenir, que ce soit à un rendez-vous professionnel ou social, est considéré comme un manque de respect sérieux.",
+    "La communication est directe et franche. Les Allemands disent ce qu'ils pensent sans détour, ce qui peut surprendre, mais ne doit pas être perçu comme de l'agressivité.",
+    "Le vouvoiement (Sie) est la norme avec les inconnus, les supérieurs et les personnes plus âgées. Passer au tutoiement (du) se fait uniquement sur invitation explicite.",
+    "Les files d'attente sont scrupuleusement respectées. Couper une file est une faute sociale grave.",
+    "Le recyclage et le tri des déchets sont des obligations légales et des valeurs sociales très fortes. Le système de consigne (Pfand) sur les bouteilles est très développé.",
+    "Il est courant de frapper à la porte avant d'entrer dans une pièce, même dans les espaces semi-publics comme les bureaux.",
+    "Les Allemands apprécient la vie privée et ne posent pas de questions personnelles intrusives lors des premières rencontres. Respecter l'espace personnel est fondamental."
   ],
-
   "politeness_phrases": {
     "bonjour": "Hallo",
     "bonjour (formel)": "Guten Tag",
@@ -41,7 +39,7 @@
     "bienvenue": "Willkommen",
     "merci": "Danke",
     "merci beaucoup": "Vielen Dank",
-    "de rien": "Bitte schön",
+    "de rien": "Bitte",
     "s'il vous plaît": "Bitte",
     "s'il te plaît": "Bitte",
     "excusez-moi": "Entschuldigung",
@@ -49,25 +47,24 @@
     "désolé": "Es tut mir leid",
     "oui": "Ja",
     "non": "Nein",
-    "comment ca va ?": "Wie geht es dir?",
+    "comment ca va ?": "Wie geht es Ihnen? / Wie geht's?",
     "je ne comprends pas": "Ich verstehe nicht",
     "pouvez-vous répéter ?": "Können Sie das wiederholen?",
-    "parlez plus lentement": "Bitte langsamer sprechen",
+    "parlez plus lentement": "Sprechen Sie bitte langsamer",
     "parlez-vous anglais ?": "Sprechen Sie Englisch?",
-    "où sont les toilettes ?": "Wo ist die Toilette?",
-    "combien ça coûte ?": "Wie viel kostet das?",
+    "où sont les toilettes ?": "Wo sind die Toiletten?",
+    "combien ça coûte ?": "Was kostet das?",
     "je voudrais ça": "Ich möchte das",
-    "aidez-moi s'il vous plaît": "Bitte helfen Sie mir",
+    "aidez-moi s'il vous plaît": "Helfen Sie mir bitte",
     "bonne chance": "Viel Glück",
-    "félicitations": "Glückwunsch",
-    "santé !": "Prost!"
+    "félicitations": "Herzlichen Glückwunsch",
+    "santé !": "Prost! / Zum Wohl!"
   },
-
   "basic_vocabulary": {
     "oui": "Ja",
     "non": "Nein",
     "peut-être": "Vielleicht",
-    "d'accord": "In Ordnung",
+    "d'accord": "OK / In Ordnung",
     "combien": "Wie viel",
     "où": "Wo",
     "quand": "Wann",
@@ -86,12 +83,12 @@
     "cher": "Teuer",
     "pas cher": "Günstig",
     "payer": "Bezahlen",
-    "carte bancaire": "Bankkarte",
+    "carte bancaire": "Kreditkarte",
     "espèces": "Bargeld",
     "eau": "Wasser",
     "pain": "Brot",
     "restaurant": "Restaurant",
-    "menu": "Menü",
+    "menu": "Speisekarte",
     "addition": "Rechnung",
     "boisson": "Getränk",
     "bière": "Bier",
@@ -104,7 +101,7 @@
     "taxi": "Taxi",
     "bus": "Bus",
     "train": "Zug",
-    "ticket": "Ticket",
+    "ticket": "Fahrkarte",
     "urgence": "Notfall",
     "aide": "Hilfe",
     "médecin": "Arzt",
@@ -114,7 +111,6 @@
     "police": "Polizei",
     "ambulance": "Krankenwagen"
   },
-
   "numbers": {
     "0": "Null",
     "1": "Eins",
@@ -138,7 +134,6 @@
     "demain": "Morgen",
     "hier": "Gestern"
   },
-
   "emergency_numbers": {
     "general": "112",
     "police": "110",
