@@ -25,7 +25,9 @@ class TestGetImages(unittest.TestCase):
             self.assertEqual(response.text, "http://example.com/photo.jpg")
 
     def test_get_image_by_name_not_found(self):
-        with patch('app.api.API_Photos.get_url_image_from_wikipedia', new_callable=AsyncMock, return_value=None):
+        with patch('app.routers.images.PhotosService') as MockService:
+            instance = MockService.return_value
+            instance.get_image_by_name = AsyncMock(return_value=None)
             response = self.client.get("/images/place?place=Inconnu")
             self.assertEqual(response.status_code, 404)
             self.assertIn("IMAGE_NOT_FOUND", response.json()["error"])
