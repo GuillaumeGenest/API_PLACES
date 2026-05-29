@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.logger import setup_logger
 from app.core.exceptions import add_exception_handlers
 from app.routers import attractions, attraction, images, descriptions, ai, trips, countries_info, users
+from app.core.security import auth_middleware
 import time
 import os
 
@@ -27,6 +28,9 @@ async def log_requests(request: Request, call_next):
     duration = round((time.time() - start) * 1000, 2)
     logger.info(f"← {request.method} {request.url.path} | {response.status_code} | {duration}ms")
     return response
+
+
+app.middleware("http")(auth_middleware)
 
 # ─── Exceptions ───────────────────────────────────────────────────
 add_exception_handlers(app)

@@ -75,8 +75,14 @@ prod: check-env
 
 # ─── Tests ───────────────────────────────────────────────────────
 test-unit: check-env
-	ENVIRONMENT=development pytest tests/unit/ -v
+	ENVIRONMENT=development TESTING=true pytest tests/unit/ -v
 
+test-integration: check-env
+	ENVIRONMENT=development pytest tests/integration/ -v
+
+test: check-env
+	ENVIRONMENT=development TESTING=true pytest tests/unit/ -v && ENVIRONMENT=development pytest tests/integration/ -v
+	
 # ─── Tests ciblés ────────────────────────────────────────────────
 # Usage : make test-file FILE=tests/unit/test_routes_trips.py
 test-file: check-env
