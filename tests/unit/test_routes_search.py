@@ -22,6 +22,13 @@ MOCK_PREDICTIONS = [
     }
 ]
 
+MOCK_COORDINATES = {
+    "place_id": "ChIJu46S-ZZhLxMROG5lkwZ3D7k",
+    "formatted_address": "Rome, Metropolitan City of Rome Capital, Italy",
+    "latitude": 41.8967068,
+    "longitude": 12.4822025
+}
+
 
 class TestAutocomplete(unittest.TestCase):
 
@@ -77,6 +84,59 @@ class TestAutocomplete(unittest.TestCase):
     def test_autocomplete_missing_input(self):
         response = self.client.get("/search/autocomplete")
         self.assertEqual(response.status_code, 422)
+
+
+class TestCoordinates(unittest.TestCase):
+
+    def setUp(self):
+        self.client = TestClient(app)
+
+    def test_coordinates_success(self):
+        with patch('app.routers.search.AutocompleteService') as MockService:
+            instance = MockService.return_value
+            instance.get_coordinates = AsyncMock(return_value=MOCK_COORDINATES)
+            response = self.client.get(
+                "/search/coordinates?place_id=ChIJu46S-ZZhLxMROG5lkwZ3D7k"
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertIn("place_id", response.json())
+            self.assertIn("latitude", response.json())
+            self.assertIn("longitude", response.json())
+            self.assertIn("formatted_address", response.json())
+
+    def test_coordinates_with_session_token(self):
+        with patch('app.routers.search.AutocompleteService') as MockService:
+            instance = MockService.return_value
+            instance.get_coordinates = AsyncMock(return_value=MOCK_COORDINATES)
+            response = self.client.get(
+                "/search/coordinates?place_id=ChIJu46S-ZZhLxMROG5lkwZ3D7k&session_token=3519edfe-0f75-4a30-bfe4-7cbd89340b2c"
+            )
+            self.assertEqual(response.status_code, 200)
+
+    def test_coordinates_not_found(self):
+        with patch('app.routers.search.AutocompleteService') as MockService:
+            instance = MockService.return_value
+            instance.get_coordinates = AsyncMock(return_value=None)
+            response = self.client.get(
+                "/search/coordinates?place_id=ChIJinconnu"
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_coordinates_missing_place_id(self):
+        response = self.client.get("/search/coordinates")
+        self.assertEqual(response.status_code, 422)
+
+    def test_coordinates_valeurs_correctes(self):
+        with patch('app.routers.search.AutocompleteService') as MockService:
+            instance = MockService.return_value
+            instance.get_coordinates = AsyncMock(return_value=MOCK_COORDINATES)
+            response = self.client.get(
+                "/search/coordinates?place_id=ChIJu46S-ZZhLxMROG5lkwZ3D7k"
+            )
+            data = response.json()
+            self.assertEqual(data["latitude"], 41.8967068)
+            self.assertEqual(data["longitude"], 12.4822025)
+            self.assertEqual(data["place_id"], "ChIJu46S-ZZhLxMROG5lkwZ3D7k")
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from typing import Optional
 from app.services.autocomplete_service import AutocompleteService
+from app.core.exceptions import PlaceNotFoundError
 from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -14,12 +15,6 @@ async def autocomplete(
     session_token: Optional[str] = None,
     language: str = "fr"
 ):
-    """
-    Retourne une liste de suggestions de lieux.
-    - input        : texte saisi (min 4 caractères)
-    - session_token: UUID généré par Android (optionnel)
-    - language     : langue des résultats (défaut: fr)
-    """
     logger.info(f"HTTP | GET /search/autocomplete — input={input} has_session={session_token is not None}")
 
     if len(input) < 4:
@@ -31,3 +26,20 @@ async def autocomplete(
 
     logger.info(f"HTTP | GET /search/autocomplete — {len(predictions)} résultats")
     return JSONResponse(content=predictions)
+
+
+@router.get("/coordinates")
+async def get_coordinates(
+    place_id: str,
+    session_token: Optional[str] = None
+):
+    logger.info(f"HTTP | GET /search/coordinates — place_id={place_id} has_session={session_token is not None}")
+
+    service = AutocompleteService()
+    coordinates = await service.get_coordinates(place_id, session_token)
+
+    if not coordinates:
+        raise PlaceNotFoundError(place_id)
+
+    logger.info(f"HTTP | GET /search/coordinates — succès place_id={place_id}")
+    return JSONResponse(content=coordinates)
