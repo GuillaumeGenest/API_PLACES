@@ -26,7 +26,8 @@ MOCK_COORDINATES = {
     "place_id": "ChIJu46S-ZZhLxMROG5lkwZ3D7k",
     "formatted_address": "Rome, Metropolitan City of Rome Capital, Italy",
     "latitude": 41.8967068,
-    "longitude": 12.4822025
+    "longitude": 12.4822025,
+    "country_code": "IT"
 }
 
 
@@ -103,6 +104,9 @@ class TestCoordinates(unittest.TestCase):
             self.assertIn("latitude", response.json())
             self.assertIn("longitude", response.json())
             self.assertIn("formatted_address", response.json())
+            self.assertIn("country_code", response.json())  # ← ajoute
+
+
 
     def test_coordinates_with_session_token(self):
         with patch('app.routers.search.AutocompleteService') as MockService:
@@ -137,6 +141,7 @@ class TestCoordinates(unittest.TestCase):
             self.assertEqual(data["latitude"], 41.8967068)
             self.assertEqual(data["longitude"], 12.4822025)
             self.assertEqual(data["place_id"], "ChIJu46S-ZZhLxMROG5lkwZ3D7k")
+            self.assertEqual(data["country_code"], "IT") 
 
 
 if __name__ == '__main__':

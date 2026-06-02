@@ -13,6 +13,12 @@ async def get_autocomplete_predictions(
     session_token: Optional[str] = None,
     language: str = "fr"
 ) -> list:
+    """
+    Nouvelle API Google Places Autocomplete (New).
+    - session_token optionnel : Android l'envoie, iOS non
+    - FieldMask limité : uniquement les champs nécessaires → optimisation coût
+    - Minimum 4 caractères géré en amont dans le router
+    """
     logger.info(f"GOOGLE | Autocomplete — input={input} has_session={session_token is not None}")
 
     payload = {
@@ -72,13 +78,18 @@ async def get_search_coordinates(
     place_id: str,
     session_token: Optional[str] = None
 ) -> Optional[dict]:
+    """
+    Récupère les coordonnées et le countryCode d'un lieu via Place Details Essentials.
+    SKU Essentials : free cap 10,000/mois → $0.005 au-delà
+    - session_token optionnel : clôture la session Android
+    """
     logger.info(f"GOOGLE | Search Coordinates — place_id={place_id} has_session={session_token is not None}")
 
     url = f"https://places.googleapis.com/v1/places/{place_id}"
     headers = {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": GOOGLE_API_KEY,
-        "X-Goog-FieldMask": "id,location,formattedAddress"
+        "X-Goog-FieldMask": "id,location,formattedAddress,addressComponents"
     }
 
     params = {}
@@ -96,14 +107,21 @@ async def get_search_coordinates(
         data = response.json()
         location = data.get("location", {})
 
+        country_code = None
+        for component in data.get("addressComponents", []):
+            if "country" in component.get("types", []):
+                country_code = component.get("shortText")
+                break
+
         result = {
             "place_id":          data.get("id"),
             "formatted_address": data.get("formattedAddress"),
             "latitude":          location.get("latitude"),
-            "longitude":         location.get("longitude")
+            "longitude":         location.get("longitude"),
+            "country_code":      country_code
         }
 
-        logger.info(f"GOOGLE | Search Coordinates — lat={result['latitude']} lng={result['longitude']}")
+        logger.info(f"GOOGLE | Search Coordinates — lat={result['latitude']} lng={result['longitude']} country={country_code}")
         return result
 
     except Exception as e:
