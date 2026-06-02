@@ -13,12 +13,6 @@ async def get_autocomplete_predictions(
     session_token: Optional[str] = None,
     language: str = "fr"
 ) -> list:
-    """
-    Nouvelle API Google Places Autocomplete (New).
-    - session_token optionnel : Android l'envoie, iOS non
-    - FieldMask limité : uniquement les champs nécessaires → optimisation coût
-    - Minimum 4 caractères géré en amont dans le router
-    """
     logger.info(f"GOOGLE | Autocomplete — input={input} has_session={session_token is not None}")
 
     payload = {
@@ -72,3 +66,46 @@ async def get_autocomplete_predictions(
     except Exception as e:
         logger.error(f"GOOGLE | Autocomplete exception — input={input} error={e}")
         return []
+
+
+async def get_search_coordinates(
+    place_id: str,
+    session_token: Optional[str] = None
+) -> Optional[dict]:
+    logger.info(f"GOOGLE | Search Coordinates — place_id={place_id} has_session={session_token is not None}")
+
+    url = f"https://places.googleapis.com/v1/places/{place_id}"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": GOOGLE_API_KEY,
+        "X-Goog-FieldMask": "id,location,formattedAddress"
+    }
+
+    params = {}
+    if session_token:
+        params["sessionToken"] = session_token
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=headers, params=params)
+
+        if response.status_code != 200:
+            logger.error(f"GOOGLE | Search Coordinates erreur — status={response.status_code} body={response.text}")
+            return None
+
+        data = response.json()
+        location = data.get("location", {})
+
+        result = {
+            "place_id":          data.get("id"),
+            "formatted_address": data.get("formattedAddress"),
+            "latitude":          location.get("latitude"),
+            "longitude":         location.get("longitude")
+        }
+
+        logger.info(f"GOOGLE | Search Coordinates — lat={result['latitude']} lng={result['longitude']}")
+        return result
+
+    except Exception as e:
+        logger.error(f"GOOGLE | Search Coordinates exception — place_id={place_id} error={e}")
+        return None
