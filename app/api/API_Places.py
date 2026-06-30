@@ -250,7 +250,7 @@ async def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory,
         return {"attraction": []}
 
 
-async def get_tourist_attraction(place_id: str):
+async def get_tourist_attraction(place_id: str, session_token: Optional[str] = None):
     logger.info(f"GOOGLE | Récupération attraction — place_id={place_id}")
 
     # ─── 1. Checker Supabase ──────────────────────────────────────
@@ -262,6 +262,11 @@ async def get_tourist_attraction(place_id: str):
     # ─── 2. Cache miss → appeler Google API ──────────────────────
     logger.info(f"SUPABASE | ❌ Attraction non trouvée — appel Google API — place_id={place_id}")
     url = f"https://places.googleapis.com/v1/places/{place_id}"
+
+    params = {}
+    if session_token:
+        params["sessionToken"] = session_token
+
     fields = [
         "id", "displayName", "location", "formattedAddress",
         "rating", "userRatingCount", "photos", "websiteUri",
@@ -276,7 +281,7 @@ async def get_tourist_attraction(place_id: str):
     }
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=headers)
+            response = await client.get(url, headers=headers, params=params)
             response.raise_for_status()
         place = response.json()
         logger.debug(f"GOOGLE | Réponse brute — place_id={place_id} data={place}")
@@ -326,7 +331,6 @@ async def get_tourist_attraction(place_id: str):
             'category': AttractionCategory.autre.value
         }
         save_attraction(attraction)
-
         logger.info(f"GOOGLE | Attraction récupérée — name={name} place_id={place_id}")
         return {"attraction": attraction}
 

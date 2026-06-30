@@ -67,6 +67,22 @@ class TestGetAttraction(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertIn("attraction", response.json())
 
+    def test_get_attraction_by_name_with_session_token(self):
+        with patch('app.routers.attraction.PlacesService') as MockService:
+            instance = MockService.return_value
+            instance.get_place_id = AsyncMock(return_value="ChIJD7fiBh9u5kcRYJSMaMOCCwQ")
+            instance.get_tourist_attraction = AsyncMock(return_value={
+                "attraction": {"name": "Tour Eiffel", "address": "Paris"}
+            })
+            response = self.client.get(
+                "/attraction/by_name?place_name=Tour+Eiffel&address=Paris&session_token=abc-123-session"
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertIn("attraction", response.json())
+            instance.get_tourist_attraction.assert_called_once_with(
+                "ChIJD7fiBh9u5kcRYJSMaMOCCwQ", session_token="abc-123-session"
+            )
+
     def test_get_attraction_by_name_not_found(self):
         with patch('app.routers.attraction.PlacesService') as MockService:
             instance = MockService.return_value
