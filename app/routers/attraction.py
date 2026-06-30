@@ -3,20 +3,23 @@ from fastapi.responses import JSONResponse
 from app.services.places_service import PlacesService
 from app.core.exceptions import PlaceNotFoundError, AttractionNotFoundError
 from app.core.logger import setup_logger
-
+from typing import Optional
 logger = setup_logger(__name__)
 router = APIRouter(prefix="/attraction", tags=["Attraction"])
 
 
 @router.get("/by_name")
-async def get_attraction_by_name(place_name: str, address: str):
-    logger.info(f"HTTP | GET /attraction/by_name — place={place_name} address={address}")
+async def get_attraction_by_name(place_name: str, address: str, session_token: Optional[str] = None):
+    logger.info(
+        f"HTTP | GET /attraction/by_name — place={place_name} address={address} "
+        f"session_token={session_token}"
+    )
     service = PlacesService()
     place_id = await service.get_place_id(place_name, address)
     if not place_id:
         logger.warning(f"HTTP | GET /attraction/by_name — place_id introuvable place={place_name}")
         raise PlaceNotFoundError(place_name)
-    attraction = await service.get_tourist_attraction(place_id)
+    attraction = await service.get_tourist_attraction(place_id, session_token=session_token)
     if not attraction:
         logger.error(f"HTTP | GET /attraction/by_name — attraction introuvable place_id={place_id}")
         raise AttractionNotFoundError()

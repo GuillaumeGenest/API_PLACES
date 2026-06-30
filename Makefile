@@ -80,6 +80,7 @@ test-unit: check-env
 test-integration: check-env
 	ENVIRONMENT=development pytest tests/integration/ -v
 
+# ─── Tests obligatoire avant de commit ───────────────────────────────────────────────────────
 test: check-env
 	ENVIRONMENT=development TESTING=true pytest tests/unit/ -v && ENVIRONMENT=development pytest tests/integration/ -v
 	
