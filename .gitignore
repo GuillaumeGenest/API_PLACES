@@ -29,6 +29,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Claude Code — règles personnelles, non partagées
+CLAUDE.local.md
+
 # mock file 
 mocked.py
 mocked_openai.py
