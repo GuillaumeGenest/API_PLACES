@@ -1,0 +1,79 @@
+name: Sync PR status label to Notion
+
+on:
+  pull_request:
+    types: [labeled, closed]
+
+jobs:
+  update-notion:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract ticket number and map label/merge to Notion status
+        id: extract
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          LABEL_NAME: ${{ github.event.label.name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          MERGED: ${{ github.event.pull_request.merged }}
+        run: |
+          TICKET_ID=$(echo "$PR_TITLE" | grep -oP 'SOR[-_]\K\d+' | head -1)
+          if [ -z "$TICKET_ID" ]; then
+            echo "No SOR-xxx ticket key found in PR title, skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$EVENT_ACTION" = "closed" ]; then
+            if [ "$MERGED" != "true" ]; then
+              echo "PR closed without merging, skipping."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            STATUS="Terminé"
+          else
+            case "$LABEL_NAME" in
+              "todo") STATUS="Todo" ;;
+              "dev-in-progress") STATUS="Dev In Progress" ;;
+              "in-qa") STATUS="In QA" ;;
+              "in-review") STATUS="In Review" ;;
+              "business-testing") STATUS="Business Testing" ;;
+              "done") STATUS="Terminé" ;;
+              "cancelled") STATUS="Canceled" ;;
+              *)
+                echo "Label '$LABEL_NAME' is not a status label, skipping."
+                echo "skip=true" >> "$GITHUB_OUTPUT"
+                exit 0
+                ;;
+            esac
+          fi
+
+          echo "ticket_id=$TICKET_ID" >> "$GITHUB_OUTPUT"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+
+      - name: Update matching Notion ticket
+        if: steps.extract.outputs.skip != 'true'
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DATA_SOURCE_ID: ${{ vars.NOTION_DATA_SOURCE_ID }}
+          TICKET_ID: ${{ steps.extract.outputs.ticket_id }}
+          STATUS: ${{ steps.extract.outputs.status }}
+        run: |
+          PAGE_ID=$(curl -s -X POST "https://api.notion.com/v1/data_sources/$DATA_SOURCE_ID/query" \
+            -H "Authorization: Bearer $NOTION_TOKEN" \
+            -H "Notion-Version: 2025-09-03" \
+            -H "Content-Type: application/json" \
+            -d "{\"filter\":{\"property\":\"ID\",\"unique_id\":{\"equals\":$TICKET_ID}}}" \
+            | jq -r '.results[0].id // empty')
+
+          if [ -z "$PAGE_ID" ]; then
+            echo "No Notion ticket found for SOR-$TICKET_ID"
+            exit 0
+          fi
+
+          curl -s -X PATCH "https://api.notion.com/v1/pages/$PAGE_ID" \
+            -H "Authorization: Bearer $NOTION_TOKEN" \
+            -H "Notion-Version: 2025-09-03" \
+            -H "Content-Type: application/json" \
+            -d "{\"properties\":{\"État\":{\"status\":{\"name\":\"$STATUS\"}}}}"
+
+          echo "Updated SOR-$TICKET_ID -> $STATUS"

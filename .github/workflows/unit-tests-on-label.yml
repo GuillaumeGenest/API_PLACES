@@ -1,0 +1,37 @@
+name: Run unit tests on label
+
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  run-tests:
+    if: github.event.label.name == 'unit-test'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Remove the trigger label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr edit ${{ github.event.pull_request.number }} -R ${{ github.repository }} --remove-label unit-test
+
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.13.2'
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt pytest
+      - name: Run unit tests
+        run: pytest tests/unit/ -v
+        env:
+          ENVIRONMENT: testing
+          TESTING: "true"
+          GOOGLE_API_KEY_TEST: ${{ secrets.GOOGLE_API_KEY_TEST }}
+          OPENAI_API_KEY_TEST: ${{ secrets.OPENAI_API_KEY_TEST }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY_TEST }}
+          SERVER_BASE_URL_TEST: "http://localhost"
+          SUPABASE_BASE_URL_TEST: "https://test.supabase.co"
+          SUPABASE_API_KEY_TEST: "test_key"
