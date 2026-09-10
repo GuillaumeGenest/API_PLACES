@@ -22,13 +22,13 @@ jobs:
           fi
 
           case "$LABEL_NAME" in
-            "status:todo") STATUS="Todo" ;;
-            "status:dev-in-progress") STATUS="Dev In Progress" ;;
-            "status:in-qa") STATUS="In QA" ;;
-            "status:in-review") STATUS="In Review" ;;
-            "status:business-testing") STATUS="Business Testing" ;;
-            "status:done") STATUS="Terminé" ;;
-            "status:cancelled") STATUS="Canceled" ;;
+            "todo") STATUS="Todo" ;;
+            "dev-in-progress") STATUS="Dev In Progress" ;;
+            "in-qa") STATUS="In QA" ;;
+            "in-review") STATUS="In Review" ;;
+            "business-testing") STATUS="Business Testing" ;;
+            "done") STATUS="Terminé" ;;
+            "cancelled") STATUS="Canceled" ;;
             *)
               echo "Label '$LABEL_NAME' is not a status label, skipping."
               echo "skip=true" >> "$GITHUB_OUTPUT"
