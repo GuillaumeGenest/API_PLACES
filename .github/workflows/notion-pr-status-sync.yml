@@ -2,17 +2,19 @@ name: Sync PR status label to Notion
 
 on:
   pull_request:
-    types: [labeled]
+    types: [labeled, closed]
 
 jobs:
   update-notion:
     runs-on: ubuntu-latest
     steps:
-      - name: Extract ticket number and map label to Notion status
+      - name: Extract ticket number and map label/merge to Notion status
         id: extract
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           LABEL_NAME: ${{ github.event.label.name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          MERGED: ${{ github.event.pull_request.merged }}
         run: |
           TICKET_ID=$(echo "$PR_TITLE" | grep -oP 'SOR[-_]\K\d+' | head -1)
           if [ -z "$TICKET_ID" ]; then
@@ -21,20 +23,29 @@ jobs:
             exit 0
           fi
 
-          case "$LABEL_NAME" in
-            "todo") STATUS="Todo" ;;
-            "dev-in-progress") STATUS="Dev In Progress" ;;
-            "in-qa") STATUS="In QA" ;;
-            "in-review") STATUS="In Review" ;;
-            "business-testing") STATUS="Business Testing" ;;
-            "done") STATUS="Terminé" ;;
-            "cancelled") STATUS="Canceled" ;;
-            *)
-              echo "Label '$LABEL_NAME' is not a status label, skipping."
+          if [ "$EVENT_ACTION" = "closed" ]; then
+            if [ "$MERGED" != "true" ]; then
+              echo "PR closed without merging, skipping."
               echo "skip=true" >> "$GITHUB_OUTPUT"
               exit 0
-              ;;
-          esac
+            fi
+            STATUS="Terminé"
+          else
+            case "$LABEL_NAME" in
+              "todo") STATUS="Todo" ;;
+              "dev-in-progress") STATUS="Dev In Progress" ;;
+              "in-qa") STATUS="In QA" ;;
+              "in-review") STATUS="In Review" ;;
+              "business-testing") STATUS="Business Testing" ;;
+              "done") STATUS="Terminé" ;;
+              "cancelled") STATUS="Canceled" ;;
+              *)
+                echo "Label '$LABEL_NAME' is not a status label, skipping."
+                echo "skip=true" >> "$GITHUB_OUTPUT"
+                exit 0
+                ;;
+            esac
+          fi
 
           echo "ticket_id=$TICKET_ID" >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
