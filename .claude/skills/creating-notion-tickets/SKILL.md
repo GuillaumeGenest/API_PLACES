@@ -28,6 +28,12 @@ each section; [`examples.md`](examples.md) reproduces two real tickets from this
     - `Sub project` = `["API"]`
     - `État` = `Todo`
     - `Projet` (relation) = the SunnyOnRoads project page, `https://app.notion.com/p/42c732aa3c544d5d83fa90120024970a`
+    - **Icon** = the purple light-bulb, matching every real ticket in this database (template included).
+      `notion-create-pages`'s `icon` field doesn't accept Notion's native icon name directly — pass the
+      URL `https://www.notion.so/icons/light-bulb_purple.svg` and it resolves to the correct native
+      icon (verified: `iconMetadata` comes back as `{"type":"icon","icon":{"name":"light-bulb","color":"purple"}}`,
+      not an external image). Set it at creation time; if it was missed, fix it after with
+      `notion-update-page` passing the same URL as `icon`.
 - **Not fixed — ask or infer from context, then confirm:**
     - `Task Type` — one of `Bug`, `Maintenance`, `New Feature`, `Improvement`, `Optional`
     - `Priority` — one of `0 - Critical`, `1 - Hight`, `2 - Medium`, `3 - Low`, `4 - Option`
@@ -73,6 +79,11 @@ Draft it in the scratchpad (or `/tmp`), not as a Notion page yet.
 - Success criteria are concrete and testable (route + expected status/shape, not vague intent).
 - Sub-tasks are unticked (new ticket, work not started) unless the author says otherwise.
 - `Task Type` and `Priority` were confirmed, not silently guessed.
+- **The properties JSON literally contains `"Sub project": ["API"]`** — check the payload itself
+  before calling `notion-create-pages`, don't just trust that Step 4's template was followed. This is
+  the one property most likely to get silently dropped when several tickets are drafted in a row.
+- **`icon` is set to `https://www.notion.so/icons/light-bulb_purple.svg`** in the same
+  `notion-create-pages` call — easy to forget since it's outside the `properties` block.
 
 ## Step 4 — Create
 
@@ -89,6 +100,7 @@ one call — include the `Projet` relation directly, no separate update step nee
     "Priority": "<0 - Critical|1 - Hight|2 - Medium|3 - Low|4 - Option>",
     "Projet": ["https://app.notion.com/p/42c732aa3c544d5d83fa90120024970a"]
   },
+  "icon": "https://www.notion.so/icons/light-bulb_purple.svg",
   "content": "<the sections from Step 2>"
 }
 ```

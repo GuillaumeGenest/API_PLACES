@@ -104,6 +104,13 @@ gh pr edit -R GuillaumeGenest/<repo> <PR#> --title "$TITLE" --body-file <body-fi
 gh pr view -R GuillaumeGenest/<repo> --json title,body            # verify
 ```
 
+**Immediately after `gh pr create` succeeds** (same turn, not a later one), update the ticket's
+`pull request` property in Notion with the new PR URL — same lookup as in Step 2 (query "⚒️ Tâches"
+for `"ID" unique_id equals <n>`, then `notion-update-page` with `{"pull request": "<pr-url>"}`). This
+step was missed once (`SOR-248`, PR #19) and had to be fixed after the fact — treat it as part of
+"create the PR," not a separate follow-up task. Skip it only when the PR has no ticket key (see edge
+cases below).
+
 ## Edge cases
 
 - **No divergence from `main`** — nothing to describe; report it and stop.

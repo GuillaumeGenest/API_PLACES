@@ -53,6 +53,7 @@ earns a line; don't pad it.
 | `Sub project` | `["API"]` | This repo is the API sub-project. |
 | `État` | `Todo` | Every new ticket starts here. |
 | `Projet` | `["https://app.notion.com/p/42c732aa3c544d5d83fa90120024970a"]` | Links the ticket into the SunnyOnRoads project's kanban/filtered views. |
+| `icon` (page icon, not a database property) | `https://www.notion.com/icons/light-bulb_purple.svg` | Every real ticket in this database uses the purple light-bulb icon (verified on the template and on `SOR-148`, `SOR-214`, `SOR-231`). Passing this URL as `icon` resolves to Notion's native icon, not an external image — confirmed via `iconMetadata`. |
 
 ## Properties to ask or infer, never guess silently
 
