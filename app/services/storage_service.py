@@ -1,7 +1,9 @@
 import os
+import re
 import httpx
 from typing import Optional
 from app.core.config import get_server_base_url
+from app.core.exceptions import InvalidPlaceIdError
 from app.core.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -9,7 +11,11 @@ logger = setup_logger(__name__)
 STORAGE_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "images", "storage", "caches")
 os.makedirs(STORAGE_DIR, exist_ok=True)
 
+PLACE_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
+
 def get_storage_path(place_id: str) -> str:
+    if not PLACE_ID_PATTERN.match(place_id):
+        raise InvalidPlaceIdError(place_id)
     return os.path.join(STORAGE_DIR, f"{place_id}.jpg")
 
 """Retourne l'URL publique de l'image sur ton serveur"""

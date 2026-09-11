@@ -17,6 +17,10 @@ class ImageNotFoundError(Exception):
 class PlaceIdMissingError(Exception):
     pass
 
+class InvalidPlaceIdError(Exception):
+    def __init__(self, place_id: str):
+        self.place_id = place_id
+
 class DescriptionNotFoundError(Exception):
     pass
 
@@ -69,6 +73,16 @@ def add_exception_handlers(app):
             content={
                 "error": "PLACE_ID_MISSING",
                 "detail": "place_id manquant"
+            }
+        )
+
+    @app.exception_handler(InvalidPlaceIdError)
+    async def invalid_place_id_handler(request: Request, exc: InvalidPlaceIdError):
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": "INVALID_PLACE_ID",
+                "detail": "place_id invalide"
             }
         )
 
