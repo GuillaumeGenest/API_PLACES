@@ -3,6 +3,7 @@ name: Build and Push Docker Image
 on:
   push:
     branches: [main]
+    tags: ['v*']
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
@@ -29,8 +30,11 @@ jobs:
 
   build-and-push:
     needs: unit-tests
-    if: github.event_name == 'push'
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
+    concurrency:
+      group: docker-release
+      cancel-in-progress: false
     permissions:
       contents: read
       packages: write
@@ -41,8 +45,9 @@ jobs:
       - name: Build Docker image
         run: |
           owner=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker build -t ghcr.io/$owner/places-api:latest .
+          docker build -t ghcr.io/$owner/places-api:${{ github.ref_name }} -t ghcr.io/$owner/places-api:latest .
       - name: Push Docker image
         run: |
           owner=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          docker push ghcr.io/$owner/places-api:${{ github.ref_name }}
           docker push ghcr.io/$owner/places-api:latest
