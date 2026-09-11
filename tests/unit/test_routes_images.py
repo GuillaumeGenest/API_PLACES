@@ -91,6 +91,11 @@ class TestGetImages(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.text, "http://localhost:8000/images/storage/caches/test_place_id.jpg")
 
+    def test_get_image_by_id_path_traversal_rejected(self):
+        response = self.client.get("/images/id?place_id=..%2F..%2Fetc%2Fpasswd")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("INVALID_PLACE_ID", response.json()["error"])
+
     def test_get_image_by_id_no_photo(self):
         with patch.object(images_module.photos_service, 'get_image_by_place_id', new_callable=AsyncMock, return_value=None), \
              patch('app.routers.images.is_stored', return_value=False), \
