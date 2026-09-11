@@ -3,7 +3,7 @@
 ## Local Overrides
 
 - Si `CLAUDE.local.md` existe à la racine (fichier personnel, non committé), le lire d'abord.
-- Ses instructions priment sur celles de ce document en cas de conflit — notamment tout le workflow git/build/test.
+- Ses instructions priment sur celles de ce document en cas de conflit — réservé aux exceptions strictement personnelles, le workflow git/build/test de référence est documenté ci-dessous.
 
 ## Overview
 
@@ -47,11 +47,36 @@
 
 ### Workflow
 
-Voir `CLAUDE.local.md` — c'est la référence pour tout ce qui touche git, commits, PR, builds et tests sur ce repo.
+- À chaque demande non triviale, présenter d'abord un **plan de développement** et attendre ma validation explicite.
+- **Aucune modification** (fichiers, code) sans validation préalable.
+- Idem pour **toute opération git** (commit, push, reset, checkout, rebase, merge) : proposer, puis attendre validation.
+
+#### Git : c'est moi qui valide, à chaque fois
+
+- **Avoir la permission technique de lancer une commande git ne vaut pas autorisation.** Le fait que l'outil s'exécute sans demander confirmation ne veut pas dire que tu peux t'en servir. Chaque opération git demande mon accord explicite, à chaque fois, y compris quand je viens d'en valider une autre juste avant.
+- **« Commite » veut dire : crée un nouveau commit.** Jamais `--amend`, jamais de squash, jamais de `reset` ou de rebase pour réécrire l'historique — même si rien n'est poussé, même si le changement « appartient logiquement » au commit précédent. Si tu penses qu'un amend serait plus propre, dis-le et laisse-moi trancher.
+- **Un « ok » de ma part valide l'action en cours, pas les suivantes.** N'enchaîne pas sur un commit, un push, une PR (création/édition/label/fermeture/merge) ou une suppression de branche parce que ça paraît être l'étape logique d'après.
+- **Ce qui ne doit jamais entrer dans un commit** sans que je le demande nommément :
+    - mes modifications locales de mise au point (valeurs de debug, lignes commentées volontairement) — tu ne les supprimes pas et tu ne les commites pas ;
+    - les fichiers de plan — tu n'en crées pas et tu n'en commites pas, le plan reste dans la conversation ;
+    - les fichiers générés (`.venv/`, `__pycache__/`, `.pytest_cache/`, logs).
+- Avant tout commit, **liste-moi les fichiers qui vont y entrer** et attends mon feu vert.
+
+#### Démarrage d'un ticket
+
+- Avant de commencer un ticket : créer une nouvelle branche depuis `main` (jamais travailler directement sur `main` ni sur une branche existante pour un nouveau ticket).
+- Passer le ticket Notion correspondant en `Dev In Progress` au moment où le travail démarre (pas seulement au label/merge de la PR).
+
+#### Builds et tests : c'est moi qui les lance
+
+- **Ne jamais lancer de build ni de test toi-même.** Cela inclut `make dev`, `make test`, `make test-unit`, `make test-integration`, `make test-file`, `make test-one`, `pytest`, `docker build`/`docker run`, et tout outil MCP équivalent.
+- Quand un build ou un test est nécessaire, **dis-le explicitement et arrête-toi** : donne la commande exacte à exécuter, et ce que je dois relever dans la sortie (erreurs attendues, warnings à surveiller, log à filtrer). Puis attends que je te renvoie le résultat.
+- Ne jamais déduire, supposer ni annoncer le résultat d'un build/test que je n'ai pas encore lancé. Pas de « ça devrait passer » présenté comme un fait.
+- Corollaire : découper le travail en **petits blocs**, un changement par build/test. Après chaque bloc, rendre la main pour que je lance la vérification, et attendre la sortie avant d'entamer le bloc suivant.
 
 ### AI-Assisted Development
 
-1. **Plan First** — pour toute tâche d'implémentation (hors fix trivial mono-fichier ou question informative), présenter le plan et attendre validation avant de commencer.
+1. **Plan First** — pour toute tâche de développement, sans exception, présenter le plan et attendre validation explicite avant de commencer.
 2. **Self-Improvement** — après une correction, retenir le pattern pour ne pas répéter l'erreur (mémoire du projet).
 3. **Code Quality Check** — pour un changement non trivial : vérifier que l'approche suit les conventions du projet, minimise la complexité, réutilise les patterns/abstractions existants (services/routers/models déjà en place). Reconsidérer si une solution semble bancale.
 4. **Review and reasoning from code** — pour le comportement, l'intention, les cas limites et la correction, se baser uniquement sur le **code exécutable et les tests**. Ne pas utiliser les commentaires inline ou les messages de commit comme preuve.
