@@ -25,6 +25,8 @@ references a ticket that already exists there.
 - **Never append an AI attribution trailer** (`🤖 Generated with …`) to the title or the body.
 - **No "Impacted Submodules" section** — this repo has none, don't invent the concept.
 - **No "Reviews required" / "Owners" sections** — solo project, nothing to assign or count.
+- **Screenshots only for `SunnyOnRoads` / `SunnyOnRoads_android`** — never in an `API_PLACES` PR (no
+  UI); see `references/pr-body.md`.
 - **No Jira, no CI title-regex gate, no bot-generated section.** This skill's structure (emoji
   headings, checklist body) was adapted from another project's PR skill (iOS repo, Jira-based,
   GitHub Actions bot) — only the parts that make sense for a solo Python/FastAPI repo with Notion
@@ -104,7 +106,8 @@ scratchpad directory (or `/tmp/pr_body.md` if none), never inside the repo.
 - Title is `[SOR-xxx] <imperative summary>`, matching the convention already in this repo's history
   (no CI regex enforces it here — it's a convention, not a gate).
 - Headings match `references/pr-body.md` **verbatim, emoji included** (`## 📓 Description`,
-  `## 📋 Changes proposed in this pull request`, `## 🧪 How to test`, `## 🧾 Notion`).
+  `## 📋 Changes proposed in this pull request`, `## 🧪 How to test`, `## 📷 Screenshots` — app repos
+  only, `## 🧾 Notion`).
 - `Description` states the **problem observed**, in prose, with no file/symbol names — those belong
   in `Changes proposed in this pull request` instead (see `references/pr-body.md`).
 - `Changes proposed in this pull request` is a checklist (`- [x]` done, `- [ ]` still pending) where

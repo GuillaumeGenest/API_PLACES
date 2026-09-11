@@ -91,6 +91,27 @@ than padding it with something vague. When the change isn't observable by clicki
 (perf, caching, an internal refactor) — name the signal instead (log line, response time, a
 `make test` target that covers it), don't force a fake journey.
 
+## `## 📷 Screenshots`
+
+**Only for `SunnyOnRoads` (iOS) and `SunnyOnRoads_android`** — `API_PLACES` has no UI, so this
+section never appears in an `API_PLACES` PR; drop it entirely there rather than writing
+`Not applicable`.
+
+For the two app repos, when the change has any visible effect (a new screen, a layout fix, a color
+change): a two-column table, one platform per PR since this skill only ever describes a change to one
+app at a time — keep the column for the repo the PR is against, drop the other:
+
+```markdown
+| iOS | Android |
+| --- | ------- |
+| <img src="…" /> | <img src="…" /> |
+```
+
+No visible change (a networking fix with no UI symptom, an internal refactor) → drop the section.
+Never leave a placeholder image or `TODO: screenshot` in place — an unticked `- [ ]` item in
+`Changes proposed in this pull request` ("Screenshot pending") is preferable when the image isn't
+ready yet but the section itself is expected.
+
 ## `## 🧾 Notion`
 
 ```markdown
