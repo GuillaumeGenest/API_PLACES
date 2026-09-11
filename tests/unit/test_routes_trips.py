@@ -95,6 +95,14 @@ class TestCityTrip(unittest.TestCase):
         response = self.client.get("/trips/city?city_name=Paris")
         self.assertEqual(response.status_code, 422)
 
+    def test_city_trip_internal_exception_hides_details(self):
+        with patch('app.api.API_Trip.client') as mock_client:
+            mock_client.responses.create = AsyncMock(side_effect=Exception("db password leaked: hunter2"))
+            response = self.client.get("/trips/city?city_name=Paris&firstdate=2024-06-01&lastdate=2024-06-03")
+            self.assertEqual(response.status_code, 500)
+            self.assertNotIn("hunter2", response.text)
+            self.assertEqual(response.json()["detail"], "Erreur serveur interne")
+
 
 class TestRoadTrip(unittest.TestCase):
 
@@ -133,6 +141,14 @@ class TestRoadTrip(unittest.TestCase):
     def test_road_trip_missing_params(self):
         response = self.client.get("/trips/roadtrip?region=Paris")
         self.assertEqual(response.status_code, 422)
+
+    def test_road_trip_internal_exception_hides_details(self):
+        with patch('app.api.API_Trip.client') as mock_client:
+            mock_client.responses.create = AsyncMock(side_effect=Exception("db password leaked: hunter2"))
+            response = self.client.get("/trips/roadtrip?region=Paris&firstdate=2024-06-01&lastdate=2024-06-07")
+            self.assertEqual(response.status_code, 500)
+            self.assertNotIn("hunter2", response.text)
+            self.assertEqual(response.json()["detail"], "Erreur serveur interne")
 
 
 if __name__ == '__main__':
