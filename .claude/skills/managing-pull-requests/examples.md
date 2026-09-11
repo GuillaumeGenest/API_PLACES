@@ -1,12 +1,16 @@
 # Examples
 
-Two merged pull requests from `API_PLACES`, reproduced **as they were actually written** (not
-invented — pulled with `gh pr view --json body`). They calibrate size and tone: match the change,
-not the size of the example.
+Two merged pull requests from `API_PLACES` (Examples 1 and 2), reproduced **as they were actually
+written** (not invented — pulled with `gh pr view --json body`), plus one (Example 3) recalibrated to
+the current template so there's a full worked example in the actual current format. They calibrate
+size and tone: match the change, not the size of the example.
 
-Neither one ends with a `Close [SOR-xxx](<notion-url>)` line — that convention was added after these
-PRs were merged (see `references/pr-body.md`). Add it on every new PR from now on, as a real link to
-the Notion ticket, not plain text; don't read its absence here as license to skip it.
+**Format note (2026-09-11):** Examples 1 and 2 predate two changes: the `Close [SOR-xxx](<notion-url>)`
+line (added after both merged — add it on every new PR from now on, as a real link, not plain text)
+and the current headings (`## 📓 Description`, `## 📋 Changes proposed in this pull request`,
+`## 🧪 How to test`, `## 🧾 Notion`, checklist body) adopted 2026-09-11, adapted from another project's
+PR skill — see `SKILL.md`'s Discipline section and `references/pr-body.md`. Match the **structure** of
+Example 3 for new PRs; Examples 1–2 still calibrate size, tone, and the "why before what" instinct.
 
 ## Example 1 — a new endpoint (#16, `[SOR-214]`)
 
@@ -102,3 +106,54 @@ Both
 - **`How to test` names the make targets**, not raw pytest invocations — matches how this project
   actually runs its test suite (see `CLAUDE.local.md`: the author runs these, not Claude).
 - No screenshots, no reviewer count, no owners — none of that applies here, so none of it appears.
+
+## Example 3 — a security fix, current format (#23, `[SOR-250]`)
+
+Two files, a validation regex plus one new exception class. The **actual merged PR #23** used the
+older `## What` / `## Why` / `## How to test` headings (see the format note above) — reproduced below
+**recalibrated to the current template**, same facts, so there's one full worked example in the
+format new PRs should follow.
+
+```markdown
+## Title
+[SOR-250] Sanitize place_id to prevent path traversal in image storage
+
+## 📓 Description
+`get_storage_path()` built a filesystem path directly from the user-supplied `place_id`, with no
+validation. `is_stored()` — a bare `os.path.exists` check — was reachable with an arbitrary string
+and acted as a file-existence oracle. `place_id` reaches this code from authenticated routes like
+`GET /images/id?place_id=...` with no format check; Google's API rejects malformed IDs before
+`download_and_store` can write anything, but `is_stored()` was still exploitable as a probe.
+
+## 📋 Changes proposed in this pull request
+- [x] `get_storage_path()` (`app/services/storage_service.py`) now validates `place_id` against
+      `^[A-Za-z0-9_-]+$` before building the path — the single chokepoint used by both `is_stored()`
+      and `download_and_store()`, so both `/images/id` and `/images/place_and_address` are covered
+      without duplicating the check per router
+- [x] New `InvalidPlaceIdError` (`app/core/exceptions.py`) → 400 `INVALID_PLACE_ID`, following the
+      existing per-exception handler pattern (`PlaceIdMissingError` etc.)
+- [x] Regression test: `tests/unit/test_routes_images.py::test_get_image_by_id_path_traversal_rejected`
+
+## 🧪 How to test
+\`\`\`bash
+curl "http://localhost:8000/images/id?place_id=..%2F..%2Fetc%2Fpasswd"
+\`\`\`
+Expect `400 {"error": "INVALID_PLACE_ID", ...}`. Full file run:
+`make test-file FILE=tests/unit/test_routes_images.py` — 11/11 passed locally, no regression on
+existing valid-`place_id` flows (`test_get_image_by_id_success`, `test_get_image_by_id_cache_hit`).
+
+## 🧾 Notion
+Close [SOR-250](https://app.notion.com/p/3d7145d7c40381ffb022d9ad99cd1cd2)
+```
+
+### What to copy
+
+- `Changes proposed in this pull request` pairs **cause and remedy in the same item** — the reviewer
+  never has to hold the description in their head while reading the checklist.
+- The chokepoint rationale ("single chokepoint... without duplicating the check per router") is
+  exactly the kind of non-obvious design reasoning that belongs in the checklist item, not left for
+  a reviewer to reconstruct from the diff.
+- `How to test` closes on the non-regression that matters (existing valid `place_id` flows), not just
+  the new rejection path.
+- All three items are ticked — nothing deferred here, unlike Example 2's stacked-PR case in the
+  source skill this template was adapted from.
