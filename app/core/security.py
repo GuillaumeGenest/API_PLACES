@@ -20,7 +20,9 @@ jwks_client = PyJWKClient(f"{get_supabase_url()}/auth/v1/.well-known/jwks.json")
 
 async def auth_middleware(request: Request, call_next):
     # ── Mode test — bypass total ──────────────────────────
-    if os.getenv("TESTING") == "true":
+    # Invariant: ne doit JAMAIS s'activer en production, même si TESTING=true
+    # est mal configuré (misconfigured .env, docker run, secret CI/CD).
+    if os.getenv("TESTING") == "true" and os.getenv("ENVIRONMENT") in ("development", "testing"):
         request.state.user = {
             "sub": "febfedf3-f6fc-4043-8dce-daf2d2b95906",
             "email": "test@test.com",
