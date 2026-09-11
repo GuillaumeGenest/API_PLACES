@@ -114,9 +114,8 @@ async def generate_city_trip(ville: str, date_debut: str, date_fin: str):
         logger.error(f"TRIP | Erreur parsing JSON OpenAI — {e}")
         raise HTTPException(status_code=500, detail="Erreur lors du parsing de la réponse IA")
     except Exception as e:
-        print(f"Erreur inattendue: {str(e)}")
         logger.error(f"TRIP | Erreur inattendue {type(e).__name__} : {e}")
-        raise HTTPException(status_code=500, detail=f"Erreur serveur: {str(e)}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
 #def lieux_a_visiter(
 #    ville: str = Query(..., description="Nom de la ville ou du lieu"),
@@ -169,8 +168,6 @@ async def generate_road_trip(city: str, date_start: str, date_end: str):
                 }
             ]
         )
-       # DÉBOGAGE : Afficher le type et le contenu de la réponse
-        print(f"Type de response: {type(response)}")
         logger.debug(f"OPENAI | Réponse reçue ={response.output_text}")
         
         # Vérifier que la réponse n'est pas vide
@@ -232,4 +229,4 @@ async def generate_road_trip(city: str, date_start: str, date_end: str):
         raise
     except Exception as e:
         logger.error(f"TRIP | Erreur inattendue — {type(e).__name__}: {e}")
-        raise HTTPException(status_code=500, detail=f"Erreur serveur: {str(e)}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
