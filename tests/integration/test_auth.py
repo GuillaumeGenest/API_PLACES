@@ -1,5 +1,6 @@
 import os
 import httpx
+import pytest
 import unittest
 from fastapi.testclient import TestClient
 from app.main import app
@@ -7,17 +8,21 @@ from app.main import app
 
 def get_supabase_token() -> str:
     """Récupère un vrai token Supabase"""
-    response = httpx.post(
-        f"{os.getenv('SUPABASE_BASE_URL_DEV')}/auth/v1/token?grant_type=password",
-        headers={
-            "apikey": os.getenv("SUPABASE_API_KEY_DEV"),
-            "Content-Type": "application/json"
-        },
-        json={
-            "email": os.getenv("TEST_USER_EMAIL"),
-            "password": os.getenv("TEST_USER_PASSWORD")
-        }
-    )
+    try:
+        response = httpx.post(
+            f"{os.getenv('SUPABASE_BASE_URL_DEV')}/auth/v1/token?grant_type=password",
+            headers={
+                "apikey": os.getenv("SUPABASE_API_KEY_DEV"),
+                "Content-Type": "application/json"
+            },
+            json={
+                "email": os.getenv("TEST_USER_EMAIL"),
+                "password": os.getenv("TEST_USER_PASSWORD")
+            },
+            timeout=10,
+        )
+    except httpx.ConnectError as e:
+        pytest.skip(f"Supabase injoignable (pause/réseau) : {e}")
     return response.json()["access_token"]
 
 
