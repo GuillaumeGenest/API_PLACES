@@ -31,7 +31,7 @@ class TestBusinessExceptions(unittest.TestCase):
 
     def test_place_not_found_error(self):
         exc = PlaceNotFoundError("Paris")
-        self.assertEqual(exc.status_code, HTTPStatus.BAD_REQUEST)
+        self.assertEqual(exc.status_code, HTTPStatus.NOT_FOUND)
         self.assertEqual(exc.error_code, ErrorCode.PLACE_NOT_FOUND)
         self.assertEqual(exc.detail, "Lieu introuvable : Paris")
 

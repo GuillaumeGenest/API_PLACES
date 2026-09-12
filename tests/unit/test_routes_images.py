@@ -55,7 +55,7 @@ class TestGetImages(unittest.TestCase):
     def test_get_image_by_place_and_address_place_not_found(self):
         with patch.object(images_module.places_service, 'get_place_id', new_callable=AsyncMock, return_value=None):
             response = self.client.get("/images/place_and_address?place_name=Inconnu")
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 404)
             self.assertIn("PLACE_NOT_FOUND", response.json()["error"])
 
     def test_get_image_by_place_and_address_no_photo(self):

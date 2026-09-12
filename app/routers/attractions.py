@@ -1,7 +1,6 @@
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
 from app.services.places_service import PlacesService
-from app.models.attraction import AttractionCategory
+from app.models.attraction import AttractionCategory, AttractionResponse
 from app.core.exceptions import PlaceNotFoundError, AttractionNotFoundError
 from app.core.logger import setup_logger
 
@@ -9,7 +8,7 @@ logger = setup_logger(__name__)
 router = APIRouter(prefix="/attractions", tags=["Attractions"])
 
 
-@router.get("/")
+@router.get("/", response_model=AttractionResponse)
 async def get_attractions(city_name: str, category: AttractionCategory):
     logger.info(f"HTTP | GET /attractions — city={city_name} category={category.value}")
     service = PlacesService()
@@ -24,10 +23,10 @@ async def get_attractions(city_name: str, category: AttractionCategory):
         logger.error(f"HTTP | GET /attractions — aucune attraction city={city_name} category={category.value}")
         raise AttractionNotFoundError()
     logger.info(f"HTTP | GET /attractions — succès city={city_name} category={category.value}")
-    return JSONResponse(content=attractions)
+    return attractions
 
 
-@router.get("/by_coordinates")
+@router.get("/by_coordinates", response_model=AttractionResponse)
 async def get_attractions_by_coordinates(
     latitude: float,
     longitude: float,
@@ -40,4 +39,4 @@ async def get_attractions_by_coordinates(
         logger.error(f"HTTP | GET /attractions/by_coordinates — aucune attraction lat={latitude} lng={longitude}")
         raise AttractionNotFoundError()
     logger.info(f"HTTP | GET /attractions/by_coordinates — succès lat={latitude} lng={longitude} category={category.value}")
-    return JSONResponse(content=attractions)
+    return attractions

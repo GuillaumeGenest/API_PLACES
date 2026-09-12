@@ -124,7 +124,7 @@ class TestCoordinates(unittest.TestCase):
             response = self.client.get(
                 "/search/coordinates?place_id=ChIJinconnu"
             )
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 404)
 
     def test_coordinates_missing_place_id(self):
         response = self.client.get("/search/coordinates")

@@ -33,6 +33,6 @@ def get_db():
 if __name__ == "__main__":
     try:
         with get_engine().connect() as conn:
-            print("✅ Connexion à la base de données OK")
+            logger.info("✅ Connexion à la base de données OK")
     except Exception as e:
-        print(f"❌ Erreur de connexion : {e}")
+        logger.error(f"❌ Erreur de connexion : {e}")

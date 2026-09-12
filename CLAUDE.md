@@ -60,7 +60,7 @@
     - mes modifications locales de mise au point (valeurs de debug, lignes commentées volontairement) — tu ne les supprimes pas et tu ne les commites pas ;
     - les fichiers de plan — tu n'en crées pas et tu n'en commites pas, le plan reste dans la conversation ;
     - les fichiers générés (`.venv/`, `__pycache__/`, `.pytest_cache/`, logs).
-- Avant tout commit, **liste-moi les fichiers qui vont y entrer** et attends mon feu vert.
+- Avant tout commit, **liste-moi les fichiers qui vont y entrer ET montre-moi le message de commit complet**, et attends mon feu vert sur les deux — la liste des fichiers seule ne suffit pas.
 
 #### Démarrage d'un ticket
 

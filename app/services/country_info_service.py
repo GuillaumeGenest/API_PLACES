@@ -38,7 +38,7 @@ def search_countries(query: str):
         ).order_by(Country_info.name).all()
         return countries
     except Exception as e:
-        print(f"Erreur search_countries: {e}")
+        logger.error(f"DB | Erreur search_countries: {e}")
         return None
     finally:
         db.close()
