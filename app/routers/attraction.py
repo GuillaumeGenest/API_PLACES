@@ -1,14 +1,14 @@
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
 from app.services.places_service import PlacesService
 from app.core.exceptions import PlaceNotFoundError, AttractionNotFoundError
 from app.core.logger import setup_logger
+from app.models.attraction import SingleAttractionResponse
 from typing import Optional
 logger = setup_logger(__name__)
 router = APIRouter(prefix="/attraction", tags=["Attraction"])
 
 
-@router.get("/by_name")
+@router.get("/by_name", response_model=SingleAttractionResponse)
 async def get_attraction_by_name(place_name: str, address: str, session_token: Optional[str] = None):
     logger.info(
         f"HTTP | GET /attraction/by_name — place={place_name} address={address} "
@@ -24,10 +24,10 @@ async def get_attraction_by_name(place_name: str, address: str, session_token: O
         logger.error(f"HTTP | GET /attraction/by_name — attraction introuvable place_id={place_id}")
         raise AttractionNotFoundError()
     logger.info(f"HTTP | GET /attraction/by_name — succès place={place_name} place_id={place_id}")
-    return JSONResponse(content=attraction)
+    return attraction
 
 
-@router.get("/by_coordinates")
+@router.get("/by_coordinates", response_model=SingleAttractionResponse)
 async def get_attraction_by_coordinates(latitude: float, longitude: float):
     logger.info(f"HTTP | GET /attraction/by_coordinates — lat={latitude} lng={longitude}")
     service = PlacesService()
@@ -40,4 +40,4 @@ async def get_attraction_by_coordinates(latitude: float, longitude: float):
         logger.error(f"HTTP | GET /attraction/by_coordinates — attraction introuvable place_id={place_id}")
         raise AttractionNotFoundError()
     logger.info(f"HTTP | GET /attraction/by_coordinates — succès lat={latitude} lng={longitude} place_id={place_id}")
-    return JSONResponse(content=attraction)
+    return attraction

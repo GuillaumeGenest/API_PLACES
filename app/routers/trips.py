@@ -1,14 +1,14 @@
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import JSONResponse
 from app.services.trip_service import TripService
 from app.core.logger import setup_logger
+from app.models.trip import CityTripResponse, RoadTripResponse
 from datetime import date
 
 logger = setup_logger(__name__)
 router = APIRouter(prefix="/trips", tags=["Trips"])
 
 
-@router.get("/city")
+@router.get("/city", response_model=CityTripResponse)
 async def get_trip_in_city(city_name: str, firstdate: date, lastdate: date):
     logger.info(f"HTTP | GET /trips/city — city={city_name} from={firstdate} to={lastdate}")
     if firstdate > lastdate:
@@ -18,12 +18,12 @@ async def get_trip_in_city(city_name: str, firstdate: date, lastdate: date):
     data = await service.generate_city_trip(city_name, str(firstdate), str(lastdate))
     if data:
         logger.info(f"HTTP | GET /trips/city — succès city={city_name}")
-        return JSONResponse(content=data)
+        return data
     logger.error(f"HTTP | GET /trips/city — échec city={city_name}")
     raise HTTPException(status_code=400, detail="Erreur lors de la génération du trip")
 
 
-@router.get("/roadtrip")
+@router.get("/roadtrip", response_model=RoadTripResponse)
 async def get_roadtrip(region: str, firstdate: date, lastdate: date):
     logger.info(f"HTTP | GET /trips/roadtrip — region={region} from={firstdate} to={lastdate}")
     if firstdate > lastdate:
@@ -33,6 +33,6 @@ async def get_roadtrip(region: str, firstdate: date, lastdate: date):
     data = await service.generate_road_trip(region, str(firstdate), str(lastdate))
     if data:
         logger.info(f"HTTP | GET /trips/roadtrip — succès region={region}")
-        return JSONResponse(content=data)
+        return data
     logger.error(f"HTTP | GET /trips/roadtrip — échec region={region}")
     raise HTTPException(status_code=400, detail="Erreur lors de la génération du road trip")

@@ -1,14 +1,14 @@
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
 from typing import Optional
 from app.services.ai_service import AIService
 from app.core.exceptions import AIGenerationError
 from app.core.logger import setup_logger
+from app.models.attraction import AttractionResponse
 
 logger = setup_logger(__name__)
 router = APIRouter(prefix="/ai", tags=["AI"])
 
-@router.get("/attraction")
+@router.get("/attraction", response_model=AttractionResponse)
 async def get_ai_attraction(
     place_name: str,
     address: Optional[str] = None,
@@ -21,4 +21,4 @@ async def get_ai_attraction(
         logger.error(f"HTTP | GET /ai/attraction — échec génération place={place_name}")
         raise AIGenerationError(place_name)
     logger.info(f"HTTP | GET /ai/attraction — succès place={place_name}")
-    return JSONResponse(content=data)
+    return data
