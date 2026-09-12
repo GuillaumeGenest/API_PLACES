@@ -18,7 +18,7 @@ class TestGetAttractions(unittest.TestCase):
             instance = MockService.return_value
             instance.get_city_coordinates = AsyncMock(return_value=(48.8566, 2.3522))
             instance.get_tourist_attractions_nearby = AsyncMock(return_value={
-                "attraction": [{"name": "Tour Eiffel", "address": "Paris"}]
+                "attraction": [{"name": "Tour Eiffel", "address": "Paris", "place_id": "ChIJD7fiBh9u5kcRYJSMaMOCCwQ"}]
             })
             response = self.client.get("/attractions/?city_name=Paris&category=touristique")
             self.assertEqual(response.status_code, 200)
@@ -36,7 +36,7 @@ class TestGetAttractions(unittest.TestCase):
         with patch('app.routers.attractions.PlacesService') as MockService:
             instance = MockService.return_value
             instance.get_tourist_attractions_nearby = AsyncMock(return_value={
-                "attraction": [{"name": "Tour Eiffel", "address": "Paris"}]
+                "attraction": [{"name": "Tour Eiffel", "address": "Paris", "place_id": "ChIJD7fiBh9u5kcRYJSMaMOCCwQ"}]
             })
             response = self.client.get("/attractions/by_coordinates?latitude=48.8566&longitude=2.3522&category=touristique")
             self.assertEqual(response.status_code, 200)
@@ -61,7 +61,7 @@ class TestGetAttraction(unittest.TestCase):
             instance = MockService.return_value
             instance.get_place_id = AsyncMock(return_value="ChIJD7fiBh9u5kcRYJSMaMOCCwQ")
             instance.get_tourist_attraction = AsyncMock(return_value={
-                "attraction": {"name": "Tour Eiffel", "address": "Paris"}
+                "attraction": {"name": "Tour Eiffel", "address": "Paris", "place_id": "ChIJD7fiBh9u5kcRYJSMaMOCCwQ"}
             })
             response = self.client.get("/attraction/by_name?place_name=Tour+Eiffel&address=Paris")
             self.assertEqual(response.status_code, 200)
@@ -72,7 +72,7 @@ class TestGetAttraction(unittest.TestCase):
             instance = MockService.return_value
             instance.get_place_id = AsyncMock(return_value="ChIJD7fiBh9u5kcRYJSMaMOCCwQ")
             instance.get_tourist_attraction = AsyncMock(return_value={
-                "attraction": {"name": "Tour Eiffel", "address": "Paris"}
+                "attraction": {"name": "Tour Eiffel", "address": "Paris", "place_id": "ChIJD7fiBh9u5kcRYJSMaMOCCwQ"}
             })
             response = self.client.get(
                 "/attraction/by_name?place_name=Tour+Eiffel&address=Paris&session_token=abc-123-session"
@@ -96,7 +96,7 @@ class TestGetAttraction(unittest.TestCase):
             instance = MockService.return_value
             instance.get_place_id_from_coordinates = AsyncMock(return_value="ChIJD7fiBh9u5kcRYJSMaMOCCwQ")
             instance.get_tourist_attraction = AsyncMock(return_value={
-                "attraction": {"name": "Tour Eiffel", "address": "Paris"}
+                "attraction": {"name": "Tour Eiffel", "address": "Paris", "place_id": "ChIJD7fiBh9u5kcRYJSMaMOCCwQ"}
             })
             response = self.client.get("/attraction/by_coordinates?latitude=48.8566&longitude=2.3522")
             self.assertEqual(response.status_code, 200)
