@@ -1,27 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, Header, status
-from app.services.supabase_service import get_user_from_token, delete_user
+from fastapi import APIRouter, Depends, HTTPException
+from app.core.security import get_current_user
+from app.services.supabase_service import delete_user
 from app.core.logger import setup_logger
 logger = setup_logger(__name__)
 
-# 👉 on appelle directement "router"
 router = APIRouter(prefix="/user", tags=["User"])
-
-def get_token(authorization: str = Header(...)) -> str:
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(
-            status_code=401,
-            detail="Header Authorization invalide"
-        )
-    return authorization.replace("Bearer ", "")
 
 
 @router.delete("/delete")
-async def delete_me(token: str = Depends(get_token)):
-    # 🔹 Vérifie le JWT et récupère l'user
-    user = get_user_from_token(token)
-    user_id = user.id
+async def delete_me(user: dict = Depends(get_current_user)):
+    user_id = user["sub"]
 
-    # 🔹 Supprime via service_role
     success = delete_user(user_id)
     if not success:
         raise HTTPException(
