@@ -29,7 +29,7 @@ class TestGetAttractions(unittest.TestCase):
             instance = MockService.return_value
             instance.get_city_coordinates = AsyncMock(return_value=None)
             response = self.client.get("/attractions/?city_name=Inconnu&category=touristique")
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 404)
             self.assertIn("PLACE_NOT_FOUND", response.json()["error"])
 
     def test_get_attractions_by_coordinates_success(self):
@@ -88,7 +88,7 @@ class TestGetAttraction(unittest.TestCase):
             instance = MockService.return_value
             instance.get_place_id = AsyncMock(return_value=None)
             response = self.client.get("/attraction/by_name?place_name=Inconnu&address=Inconnu")
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 404)
             self.assertIn("PLACE_NOT_FOUND", response.json()["error"])
 
     def test_get_attraction_by_coordinates_success(self):
@@ -107,7 +107,7 @@ class TestGetAttraction(unittest.TestCase):
             instance = MockService.return_value
             instance.get_place_id_from_coordinates = AsyncMock(return_value=None)
             response = self.client.get("/attraction/by_coordinates?latitude=0.0&longitude=0.0")
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 404)
             self.assertIn("PLACE_NOT_FOUND", response.json()["error"])
 
 

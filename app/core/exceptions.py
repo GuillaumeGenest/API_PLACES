@@ -30,7 +30,7 @@ class AppError(Exception):
 
 
 class PlaceNotFoundError(AppError):
-    status_code = HTTPStatus.BAD_REQUEST
+    status_code = HTTPStatus.NOT_FOUND
     error_code = ErrorCode.PLACE_NOT_FOUND
 
     def __init__(self, place_name: str):
