@@ -35,6 +35,11 @@ app.middleware("http")(auth_middleware)
 # ─── Exceptions ───────────────────────────────────────────────────
 add_exception_handlers(app)
 
+# ─── Health check ─────────────────────────────────────────────────
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 # ─── Static files ─────────────────────────────────────────────────
 STORAGE_DIR = os.path.join(os.path.dirname(__file__), "..", "images", "storage", "caches")
 os.makedirs(STORAGE_DIR, exist_ok=True)
