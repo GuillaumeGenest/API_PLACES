@@ -12,6 +12,7 @@ STORAGE_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "images", "sto
 os.makedirs(STORAGE_DIR, exist_ok=True)
 
 PLACE_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
+MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024  # 10 Mo
 
 def get_storage_path(place_id: str) -> str:
     if not PLACE_ID_PATTERN.match(place_id):
@@ -32,17 +33,26 @@ def is_stored(place_id: str) -> bool:
     Retourne l'URL publique de ton serveur.
 """
 async def download_and_store(place_id: str, google_url: str) -> Optional[str]:
+    path = get_storage_path(place_id)
     try:
         logger.info(f"STORAGE | Téléchargement — place_id={place_id}")
 
         async with httpx.AsyncClient() as client:
-            response = await client.get(google_url, follow_redirects=True)
-            response.raise_for_status()
-            image_bytes = response.content
-
-        path = get_storage_path(place_id)
-        with open(path, "wb") as f:
-            f.write(image_bytes)
+            async with client.stream("GET", google_url, follow_redirects=True) as response:
+                response.raise_for_status()
+                total = 0
+                with open(path, "wb") as f:
+                    async for chunk in response.aiter_bytes():
+                        total += len(chunk)
+                        if total > MAX_IMAGE_SIZE_BYTES:
+                            f.close()
+                            os.remove(path)
+                            logger.error(
+                                f"STORAGE | Image trop volumineuse (> {MAX_IMAGE_SIZE_BYTES} bytes) "
+                                f"— place_id={place_id}"
+                            )
+                            return None
+                        f.write(chunk)
 
         storage_url = get_storage_url(place_id)
         logger.info(f"STORAGE | Sauvegardé — place_id={place_id} url={storage_url}")
