@@ -59,17 +59,7 @@ git merge-base "$BASE" HEAD
 git rev-list --count $(git merge-base "$BASE" HEAD)..HEAD   # commits ahead
 ```
 
-## Step 1 — Offer a branch review
-
-Before writing anything, offer:
-
-> Run `/code-review` on this branch first? (recommended)
-
-On yes, run the `code-review` skill and relay the ranked findings — fixing first is usually cheaper
-than describing a bug and fixing it in a follow-up. On no, or one word of refusal, carry on. This is
-an offer, never a gate.
-
-## Step 2 — Collect the context
+## Step 1 — Collect the context
 
 | Input | How |
 |---|---|
@@ -77,7 +67,7 @@ an offer, never a gate.
 | Acceptance criteria / description | **Notion is the source of truth right now, not Jira** — the ticket migration hasn't happened yet (as of 2026-09-10). Query the "⚒️ Tâches" data source (`collection://341fda1b-dca9-415e-846e-c479f0afc506`) filtered on `"ID" unique_id equals <n>` to find the page, then fetch it for its `Success Criteria / Test` and `Sub-tasks / Tasks` sections — see `../creating-notion-tickets/references/ticket-body.md` for what each section means. Fall back to asking the author directly if no matching ticket exists. |
 | Related repos | If the change spans API + app (e.g. a new endpoint consumed by iOS/Android), say so in the body rather than staying silent about the cross-repo dependency. |
 
-## Step 3 — Read the diff
+## Step 2 — Read the diff
 
 ```bash
 git diff --stat "$BASE"..HEAD
@@ -89,10 +79,10 @@ git diff "$BASE"..HEAD -- tests                                 # only if tests 
 Capture **intent**, not additions — a moved function is a move, not a new feature. Read every
 changed source file; that's not a license to mention every one of them. This is also where the
 **mechanism** of the change gets understood — what was actually wrong, and why the new form is
-correct — because that's what makes `Changes proposed in this pull request` (Step 4) worth reading
+correct — because that's what makes `Changes proposed in this pull request` (Step 3) worth reading
 instead of a restated file list.
 
-## Step 4 — Write the body
+## Step 3 — Write the body
 
 No `.github/PULL_REQUEST_TEMPLATE.md` exists in this repo (checked 2026-09-10) — the sections below
 are used directly, not filled from a template file. Follow
@@ -101,7 +91,7 @@ are used directly, not filled from a template file. Follow
 `Changes proposed in this pull request` is a defect, not a style choice. Write the draft to the
 scratchpad directory (or `/tmp/pr_body.md` if none), never inside the repo.
 
-## Step 5 — Self-check, fix rather than flag
+## Step 4 — Self-check, fix rather than flag
 
 - Title is `[SOR-xxx] <imperative summary>`, matching the convention already in this repo's history
   (no CI regex enforces it here — it's a convention, not a gate).
@@ -122,7 +112,7 @@ scratchpad directory (or `/tmp/pr_body.md` if none), never inside the repo.
   a real link to the ticket's Notion page, not plain text (see `references/pr-body.md`) — when a
   ticket key and its page are known; dropped entirely, not guessed, when either isn't.
 
-## Step 6 — Create or update
+## Step 5 — Create or update
 
 Show the title and the body, **wait for the author's go ahead**, then:
 
@@ -138,7 +128,7 @@ gh pr view -R GuillaumeGenest/<repo> --json title,body            # verify
 ```
 
 **Immediately after `gh pr create` succeeds** (same turn, not a later one), update the ticket's
-`pull request` property in Notion with the new PR URL — same lookup as in Step 2 (query "⚒️ Tâches"
+`pull request` property in Notion with the new PR URL — same lookup as in Step 1 (query "⚒️ Tâches"
 for `"ID" unique_id equals <n>`, then `notion-update-page` with `{"pull request": "<pr-url>"}`). This
 step was missed once (`SOR-248`, PR #19) and had to be fixed after the fact — treat it as part of
 "create the PR," not a separate follow-up task. Skip it only when the PR has no ticket key (see edge

@@ -65,6 +65,7 @@
 #### Démarrage d'un ticket
 
 - Avant de commencer un ticket : créer une nouvelle branche depuis `main` (jamais travailler directement sur `main` ni sur une branche existante pour un nouveau ticket).
+- Nom de branche préfixé par `feat/`, `fix/`, `chore/` ou `test/` selon la nature du changement — jamais `improvement/`.
 - Passer le ticket Notion correspondant en `Dev In Progress` au moment où le travail démarre (pas seulement au label/merge de la PR).
 
 #### Builds et tests : c'est moi qui les lance
