@@ -26,7 +26,9 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt pytest
       - name: Run unit tests
-        run: pytest tests/unit/ -v
+        id: pytest
+        continue-on-error: true
+        run: pytest tests/unit/ -v --junitxml=pytest-report.xml
         env:
           ENVIRONMENT: testing
           TESTING: "true"
@@ -36,3 +38,49 @@ jobs:
           SERVER_BASE_URL_TEST: "http://localhost"
           SUPABASE_BASE_URL_TEST: "https://test.supabase.co"
           SUPABASE_API_KEY_TEST: "test_key"
+
+      - name: Parse test report
+        id: report
+        if: always()
+        run: |
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import xml.etree.ElementTree as ET
+          root = ET.parse("pytest-report.xml").getroot()
+          suite = root if root.tag == "testsuite" else root.find("testsuite")
+          total = int(suite.get("tests", 0))
+          failed = int(suite.get("failures", 0))
+          aborted = int(suite.get("errors", 0))
+          skipped = int(suite.get("skipped", 0))
+          executed = total - skipped
+          successful = executed - failed - aborted
+          duration = float(suite.get("time", 0))
+          m, s = divmod(int(duration), 60)
+          print(f"total={total}")
+          print(f"executed={executed}")
+          print(f"aborted={aborted}")
+          print(f"skipped={skipped}")
+          print(f"failed={failed}")
+          print(f"successful={successful}")
+          print(f"duration={m}m {s}s")
+          EOF
+
+      - name: Post test report comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OUTCOME: ${{ steps.pytest.outcome }}
+        run: |
+          if [ "$OUTCOME" = "success" ]; then
+            ICON="✅"; STATUS="SUCCESS"
+          else
+            ICON="❌"; STATUS="FAILURE"
+          fi
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          gh pr comment ${{ github.event.pull_request.number }} -R ${{ github.repository }} --body "🧪 GitHub Actions Build Report > unit-tests-on-label > [#${{ github.run_number }}]($RUN_URL): $ICON $STATUS
+
+          - Duration: ${{ steps.report.outputs.duration }}
+          - Workflow: ${{ steps.report.outputs.total }} total / ${{ steps.report.outputs.executed }} executed / ${{ steps.report.outputs.aborted }} aborted / ${{ steps.report.outputs.skipped }} skipped / ${{ steps.report.outputs.failed }} failed / ${{ steps.report.outputs.successful }} successful"
+
+      - name: Fail job if tests failed
+        if: steps.pytest.outcome == 'failure'
+        run: exit 1
