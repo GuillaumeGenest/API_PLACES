@@ -1,4 +1,5 @@
 import os
+from functools import lru_cache
 from dotenv import load_dotenv
 from app.core.logger import setup_logger
 
@@ -36,6 +37,7 @@ def _get_env_variable(env_map: dict, label: str) -> str:
 
 
 # MARK: - Google API KEY
+@lru_cache(maxsize=1)
 def get_api_key():
     return _get_env_variable(
         {
@@ -48,6 +50,7 @@ def get_api_key():
 
 
 # MARK: - OpenAI KEY
+@lru_cache(maxsize=1)
 def get_openai_key():
     return _get_env_variable(
         {
@@ -72,6 +75,7 @@ def get_database_url():
 
 
 # MARK: - Server Base URL
+@lru_cache(maxsize=1)
 def get_server_base_url():
     return _get_env_variable(
         {
@@ -82,6 +86,7 @@ def get_server_base_url():
         "SERVER_BASE_URL",
     )
 
+@lru_cache(maxsize=1)
 def get_supabase_url():
     return _get_env_variable(
         {
@@ -93,6 +98,7 @@ def get_supabase_url():
     )
 
 # MARK: - Supabase Key
+@lru_cache(maxsize=1)
 def get_supabase_key():
     return _get_env_variable(
         {
