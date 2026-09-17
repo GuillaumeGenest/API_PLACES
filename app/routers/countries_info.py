@@ -1,12 +1,14 @@
 from fastapi import APIRouter, HTTPException
+from typing import List
 from app.services.country_info_service import get_all_countries, get_country_by_code, search_countries
 from app.core.logger import setup_logger
+from app.models.country_info import CountryInfoResponse
 
 logger = setup_logger(__name__)
 
 router = APIRouter(prefix="/country_info", tags=["country_info"])
 
-@router.get("/")
+@router.get("/", response_model=List[CountryInfoResponse])
 def list_countries():
     logger.info("HTTP | GET /country_info — liste tous les pays")
     countries = get_all_countries()
@@ -16,7 +18,7 @@ def list_countries():
     logger.info(f"HTTP | GET /country_info — succès {len(countries)} pays retournés")
     return countries
 
-@router.get("/search")
+@router.get("/search", response_model=List[CountryInfoResponse])
 def search(query: str):
     logger.info(f"HTTP | GET /country_info/search — query={query}")
     countries = search_countries(query)
@@ -26,7 +28,7 @@ def search(query: str):
     logger.info(f"HTTP | GET /country_info/search — succès {len(countries)} résultats query={query}")
     return countries
 
-@router.get("/{country_code}")
+@router.get("/{country_code}", response_model=CountryInfoResponse)
 def get_country(country_code: str):
     logger.info(f"HTTP | GET /country_info/{country_code}")
     country = get_country_by_code(country_code)

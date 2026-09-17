@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, Text, BigInteger, ARRAY, String
 from sqlalchemy.dialects.postgresql import JSONB
+from pydantic import BaseModel, ConfigDict
+from typing import Dict, List, Optional
 from app.core.database import Base
 
 class Country_info(Base):
@@ -23,3 +25,26 @@ class Country_info(Base):
     basic_vocabulary = Column(JSONB)
     numbers = Column(JSONB)
     emergency_numbers = Column(JSONB)
+
+
+class CountryInfoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    country_code: str
+    capital: str
+    population: Optional[int] = None
+    currency: str
+    currency_symbol: str
+    phone_code: str
+    utc_offset: int
+    visa: Optional[str] = None
+    climate: Optional[str] = None
+    religion: Optional[str] = None
+    culinary_customs: Optional[List[str]] = None
+    social_customs: Optional[List[str]] = None
+    politeness_phrases: Optional[Dict] = None
+    basic_vocabulary: Optional[Dict] = None
+    numbers: Optional[Dict] = None
+    emergency_numbers: Optional[Dict] = None
