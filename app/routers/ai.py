@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from typing import Optional
 from app.services.ai_service import AIService
 from app.core.exceptions import AIGenerationError
@@ -10,8 +10,8 @@ router = APIRouter(prefix="/ai", tags=["AI"])
 
 @router.get("/attraction", response_model=AttractionResponse)
 async def get_ai_attraction(
-    place_name: str,
-    address: Optional[str] = None,
+    place_name: str = Query(..., max_length=100),
+    address: Optional[str] = Query(None, max_length=150),
     category: str = "autre"
 ):
     logger.info(f"HTTP | GET /ai/attraction — place={place_name} address={address} category={category}")

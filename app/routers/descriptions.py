@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from typing import Optional
 from app.services.ai_service import AIService
 from app.core.exceptions import DescriptionNotFoundError
@@ -8,7 +8,10 @@ logger = setup_logger(__name__)
 router = APIRouter(prefix="/descriptions", tags=["Descriptions"])
 
 @router.get("/")
-async def get_description(place_name: str, address: Optional[str] = None):
+async def get_description(
+    place_name: str = Query(..., max_length=100),
+    address: Optional[str] = Query(None, max_length=150)
+):
     logger.info(f"HTTP | GET /descriptions — place={place_name} address={address}")
     service = AIService()
     description = await service.generate_description(place_name, address)
