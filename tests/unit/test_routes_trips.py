@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import unittest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, AsyncMock
+from app.core.exceptions import TooManyConcurrentGenerationsError
 from app.main import app
 
 
@@ -103,6 +104,14 @@ class TestCityTrip(unittest.TestCase):
             self.assertNotIn("hunter2", response.text)
             self.assertEqual(response.json()["detail"], "Erreur serveur interne")
 
+    def test_city_trip_too_many_concurrent_requests(self):
+        with patch('app.routers.trips.TripService') as MockService:
+            instance = MockService.return_value
+            instance.generate_city_trip = AsyncMock(side_effect=TooManyConcurrentGenerationsError())
+            response = self.client.get("/trips/city?city_name=Paris&firstdate=2024-06-01&lastdate=2024-06-03")
+            self.assertEqual(response.status_code, 429)
+            self.assertIn("TOO_MANY_CONCURRENT_REQUESTS", response.json()["error"])
+
 
 class TestRoadTrip(unittest.TestCase):
 
@@ -149,6 +158,14 @@ class TestRoadTrip(unittest.TestCase):
             self.assertEqual(response.status_code, 500)
             self.assertNotIn("hunter2", response.text)
             self.assertEqual(response.json()["detail"], "Erreur serveur interne")
+
+    def test_road_trip_too_many_concurrent_requests(self):
+        with patch('app.routers.trips.TripService') as MockService:
+            instance = MockService.return_value
+            instance.generate_road_trip = AsyncMock(side_effect=TooManyConcurrentGenerationsError())
+            response = self.client.get("/trips/roadtrip?region=Paris&firstdate=2024-06-01&lastdate=2024-06-07")
+            self.assertEqual(response.status_code, 429)
+            self.assertIn("TOO_MANY_CONCURRENT_REQUESTS", response.json()["error"])
 
 
 if __name__ == '__main__':
