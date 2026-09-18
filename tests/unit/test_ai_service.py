@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import asyncio
 import unittest
 from unittest.mock import patch, AsyncMock
+from app.core.exceptions import TooManyConcurrentGenerationsError
 from app.services.ai_service import AIService
 from app.services import ai_cache
 
@@ -63,6 +64,76 @@ class TestAIServiceAttractionCache(unittest.TestCase):
             asyncio.run(self.service.generate_attraction("LieuInexistant"))
             asyncio.run(self.service.generate_attraction("LieuInexistant"))
             self.assertEqual(mock_generate.call_count, 2)
+
+
+class TestAIServiceConcurrency(unittest.TestCase):
+
+    def setUp(self):
+        ai_cache.clear()
+        self.service = AIService()
+
+    def test_generate_attraction_dedups_concurrent_identical_calls_for_same_user(self):
+        attraction_payload = {"attraction": [{"name": "Tour Eiffel"}]}
+
+        async def slow_generate(*args, **kwargs):
+            await asyncio.sleep(0.05)
+            return attraction_payload
+
+        async def run_test():
+            with patch('app.services.ai_service.generate_attraction', side_effect=slow_generate) as mock_generate:
+                results = await asyncio.gather(
+                    self.service.generate_attraction("Tour Eiffel", "Paris", "touristique", user_id="user-1"),
+                    self.service.generate_attraction("Tour Eiffel", "Paris", "touristique", user_id="user-1"),
+                )
+                return results, mock_generate
+
+        results, mock_generate = asyncio.run(run_test())
+
+        self.assertEqual(results, [attraction_payload, attraction_payload])
+        mock_generate.assert_called_once()
+
+    def test_generate_description_dedups_concurrent_identical_calls_for_same_user(self):
+        async def slow_generate(*args, **kwargs):
+            await asyncio.sleep(0.05)
+            return "Une description."
+
+        async def run_test():
+            with patch('app.services.ai_service.generate_description', side_effect=slow_generate) as mock_generate:
+                results = await asyncio.gather(
+                    self.service.generate_description("Tour Eiffel", "Paris", user_id="user-3"),
+                    self.service.generate_description("Tour Eiffel", "Paris", user_id="user-3"),
+                )
+                return results, mock_generate
+
+        results, mock_generate = asyncio.run(run_test())
+
+        self.assertEqual(results, ["Une description.", "Une description."])
+        mock_generate.assert_called_once()
+
+    def test_generate_attraction_rejects_beyond_concurrency_cap_for_same_user(self):
+        async def run_test():
+            event = asyncio.Event()
+
+            async def blocking_generate(*args, **kwargs):
+                await event.wait()
+                return {"attraction": []}
+
+            with patch('app.services.ai_service.generate_attraction', side_effect=blocking_generate):
+                t1 = asyncio.create_task(
+                    self.service.generate_attraction("Lieu A", None, "touristique", user_id="user-2")
+                )
+                t2 = asyncio.create_task(
+                    self.service.generate_attraction("Lieu B", None, "touristique", user_id="user-2")
+                )
+                await asyncio.sleep(0.01)
+
+                with self.assertRaises(TooManyConcurrentGenerationsError):
+                    await self.service.generate_attraction("Lieu C", None, "touristique", user_id="user-2")
+
+                event.set()
+                await asyncio.gather(t1, t2)
+
+        asyncio.run(run_test())
 
 
 if __name__ == '__main__':

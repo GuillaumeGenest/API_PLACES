@@ -16,6 +16,7 @@ class ErrorCode(str, Enum):
     DESCRIPTION_NOT_FOUND = "DESCRIPTION_NOT_FOUND"
     AI_GENERATION_ERROR = "AI_GENERATION_ERROR"
     TRIP_GENERATION_ERROR = "TRIP_GENERATION_ERROR"
+    TOO_MANY_CONCURRENT_REQUESTS = "TOO_MANY_CONCURRENT_REQUESTS"
 
 
 # ─── Exceptions custom ────────────────────────────────────────────────────────
@@ -94,6 +95,14 @@ class TripGenerationError(AppError):
 
     def __init__(self):
         super().__init__("Erreur dans les informations sur la requête")
+
+
+class TooManyConcurrentGenerationsError(AppError):
+    status_code = HTTPStatus.TOO_MANY_REQUESTS
+    error_code = ErrorCode.TOO_MANY_CONCURRENT_REQUESTS
+
+    def __init__(self):
+        super().__init__("Trop de générations en cours pour cet utilisateur")
 
 
 # ─── Handler global ───────────────────────────────────────────────────────────
