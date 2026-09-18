@@ -8,8 +8,8 @@ from starlette.concurrency import run_in_threadpool
 from app.core.config import *
 from app.core.logger import setup_logger
 from app.api.API_Photos import get_url_image_from_wikipedia, get_url_image_from_google
-from app.api.API_Places_AI import generate_description
 from app.models.attraction import AttractionCategory
+from app.services.ai_service import AIService
 from app.services.storage_service import is_stored, get_storage_url, download_and_store
 from app.services.supabase_service import get_attraction_by_place_id, save_attraction
 
@@ -251,7 +251,11 @@ async def get_tourist_attractions_nearby(lat, lng, category: AttractionCategory,
         return {"attraction": []}
 
 
-async def get_tourist_attraction(place_id: str, session_token: Optional[str] = None):
+async def get_tourist_attraction(
+    place_id: str,
+    session_token: Optional[str] = None,
+    user_id: Optional[str] = None
+):
     logger.info(f"GOOGLE | Récupération attraction — place_id={place_id}")
 
     # ─── 1. Checker Supabase ──────────────────────────────────────
@@ -291,7 +295,7 @@ async def get_tourist_attraction(place_id: str, session_token: Optional[str] = N
         address = place.get('formattedAddress', None)
 
         logger.debug(f"OPENAI | Génération description — name={name}")
-        description = await generate_description(name, full_address=address)
+        description = await AIService().generate_description(name, address, user_id=user_id)
 
         # ─── Photo avec cache ─────────────────────────────────
         logger.debug(f"GOOGLE | Récupération photo — place_id={place_id}")

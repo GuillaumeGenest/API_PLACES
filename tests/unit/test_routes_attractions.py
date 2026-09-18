@@ -80,7 +80,9 @@ class TestGetAttraction(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertIn("attraction", response.json())
             instance.get_tourist_attraction.assert_called_once_with(
-                "ChIJD7fiBh9u5kcRYJSMaMOCCwQ", session_token="abc-123-session"
+                "ChIJD7fiBh9u5kcRYJSMaMOCCwQ",
+                session_token="abc-123-session",
+                user_id="febfedf3-f6fc-4043-8dce-daf2d2b95906"
             )
 
     def test_get_attraction_by_name_not_found(self):
