@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from enum import Enum
 from typing import List, Optional
+from starlette.concurrency import run_in_threadpool
 from app.core.config import *
 from app.core.logger import setup_logger
 from app.api.API_Photos import get_url_image_from_wikipedia, get_url_image_from_google
@@ -254,7 +255,7 @@ async def get_tourist_attraction(place_id: str, session_token: Optional[str] = N
     logger.info(f"GOOGLE | Récupération attraction — place_id={place_id}")
 
     # ─── 1. Checker Supabase ──────────────────────────────────────
-    cached = get_attraction_by_place_id(place_id)
+    cached = await run_in_threadpool(get_attraction_by_place_id, place_id)
     if cached:
         logger.info(f"SUPABASE | ✅ Attraction trouvée — place_id={place_id}")
         return {"attraction": cached}
@@ -330,7 +331,7 @@ async def get_tourist_attraction(place_id: str, session_token: Optional[str] = N
             'price_range': format_price_range(place.get('priceRange')),
             'category': AttractionCategory.autre.value
         }
-        save_attraction(attraction)
+        await run_in_threadpool(save_attraction, attraction)
         logger.info(f"GOOGLE | Attraction récupérée — name={name} place_id={place_id}")
         return {"attraction": attraction}
 
