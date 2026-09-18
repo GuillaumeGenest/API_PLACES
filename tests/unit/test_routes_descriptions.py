@@ -29,6 +29,14 @@ class TestGetDescriptions(unittest.TestCase):
             self.assertEqual(response.status_code, 404)
             self.assertIn("DESCRIPTION_NOT_FOUND", response.json()["error"])
 
+    def test_get_description_place_name_too_long(self):
+        with patch('app.routers.descriptions.AIService') as MockService:
+            instance = MockService.return_value
+            instance.generate_description = AsyncMock()
+            response = self.client.get(f"/descriptions/?place_name={'a' * 101}")
+            self.assertEqual(response.status_code, 422)
+            instance.generate_description.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
