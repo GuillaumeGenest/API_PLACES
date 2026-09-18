@@ -116,6 +116,58 @@ class TestDedupCall(unittest.TestCase):
         self.assertEqual(len(results), 2)
         self.assertTrue(all(isinstance(r, ValueError) for r in results))
 
+    def test_producer_cancellation_wakes_other_waiters_instead_of_hanging(self):
+        async def slow_factory():
+            await asyncio.sleep(1)
+            return "unreachable"
+
+        async def run_test():
+            producer_task = asyncio.create_task(dedup_call("key-4", slow_factory))
+            await asyncio.sleep(0.01)  # producer registers the pending future
+
+            waiter_task = asyncio.create_task(dedup_call("key-4", slow_factory))
+            await asyncio.sleep(0.01)  # waiter attaches to the same future
+
+            producer_task.cancel()
+
+            with self.assertRaises(asyncio.CancelledError):
+                await producer_task
+
+            # Bounded wait: without the fix, this would hang forever instead
+            # of raising CancelledError.
+            with self.assertRaises(asyncio.CancelledError):
+                await asyncio.wait_for(waiter_task, timeout=1)
+
+        asyncio.run(run_test())
+
+    def test_consumer_cancellation_does_not_affect_shared_future(self):
+        call_count = 0
+
+        async def factory():
+            nonlocal call_count
+            call_count += 1
+            await asyncio.sleep(0.05)
+            return "result"
+
+        async def run_test():
+            producer_task = asyncio.create_task(dedup_call("key-5", factory))
+            await asyncio.sleep(0.01)
+
+            consumer_task = asyncio.create_task(dedup_call("key-5", factory))
+            await asyncio.sleep(0.01)
+
+            consumer_task.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await consumer_task
+
+            # The producer and the shared future must be unaffected.
+            return await asyncio.wait_for(producer_task, timeout=1)
+
+        result = asyncio.run(run_test())
+
+        self.assertEqual(result, "result")
+        self.assertEqual(call_count, 1)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
