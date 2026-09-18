@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from starlette.concurrency import run_in_threadpool
 from app.core.security import get_current_user
 from app.services.supabase_service import delete_user
 from app.core.logger import setup_logger
@@ -11,7 +12,7 @@ router = APIRouter(prefix="/user", tags=["User"])
 async def delete_me(user: dict = Depends(get_current_user)):
     user_id = user["sub"]
 
-    success = delete_user(user_id)
+    success = await run_in_threadpool(delete_user, user_id)
     if not success:
         raise HTTPException(
             status_code=500,
