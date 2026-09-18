@@ -3,6 +3,7 @@ import jwt
 from jwt import PyJWKClient
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 from app.core.config import get_supabase_url
 from app.core.logger import setup_logger
 
@@ -42,7 +43,7 @@ async def auth_middleware(request: Request, call_next):
     token = auth_header.replace("Bearer ", "")
 
     try:
-        signing_key = jwks_client.get_signing_key_from_jwt(token)
+        signing_key = await run_in_threadpool(jwks_client.get_signing_key_from_jwt, token)
         payload = jwt.decode(
             token,
             signing_key.key,
