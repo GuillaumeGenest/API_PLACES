@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import unittest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, AsyncMock
+from app.core.exceptions import TooManyConcurrentGenerationsError
 from app.main import app
 
 
@@ -53,6 +54,14 @@ class TestGetAIAttraction(unittest.TestCase):
             response = self.client.get(f"/ai/attraction?place_name={'a' * 101}")
             self.assertEqual(response.status_code, 422)
             instance.generate_attraction.assert_not_called()
+
+    def test_get_ai_attraction_too_many_concurrent_requests(self):
+        with patch('app.routers.ai.AIService') as MockService:
+            instance = MockService.return_value
+            instance.generate_attraction = AsyncMock(side_effect=TooManyConcurrentGenerationsError())
+            response = self.client.get("/ai/attraction?place_name=Tour+Eiffel")
+            self.assertEqual(response.status_code, 429)
+            self.assertIn("TOO_MANY_CONCURRENT_REQUESTS", response.json()["error"])
 
 
 if __name__ == '__main__':
