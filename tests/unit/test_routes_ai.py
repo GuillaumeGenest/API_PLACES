@@ -63,6 +63,14 @@ class TestGetAIAttraction(unittest.TestCase):
             self.assertEqual(response.status_code, 429)
             self.assertIn("TOO_MANY_CONCURRENT_REQUESTS", response.json()["error"])
 
+    def test_get_ai_attraction_invalid_category(self):
+        with patch('app.routers.ai.AIService') as MockService:
+            instance = MockService.return_value
+            instance.generate_attraction = AsyncMock()
+            response = self.client.get("/ai/attraction?place_name=Tour+Eiffel&category=not_a_real_category")
+            self.assertEqual(response.status_code, 422)
+            instance.generate_attraction.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
