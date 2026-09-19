@@ -36,7 +36,7 @@ Retourne UNIQUEMENT un JSON valide avec EXACTEMENT cette structure :
       "address": string,
       "latitude": float ou null,
       "longitude": float ou null,
-      "rating": float ou "Non notée",
+      "rating": float ou null,
       "user_ratings_total": integer,
       "website": string ou "Non disponible",
       "phone": string ou "Non disponible",
@@ -84,13 +84,19 @@ Règles :
 
             opening_hours = place.get('opening_hours', [])
 
+            raw_rating = place.get('rating')
+            try:
+                rating = float(raw_rating) if raw_rating is not None else None
+            except (ValueError, TypeError):
+                rating = None
+
             attraction = {
                 'name': place.get('name', 'Non spécifié'),
                 'address': place.get('address', 'Non spécifiée'),
                 'place_id': f"ai_{uuid.uuid4().hex}",
                 'latitude': place.get('latitude'),
                 'longitude': place.get('longitude'),
-                'rating': place.get('rating', 'Non notée'),
+                'rating': rating,
                 'user_ratings_total': place.get('user_ratings_total', 0),
                 'photo_urls': [photo_url] if photo_url else [],
                 'website': place.get('website', 'Non disponible'),
