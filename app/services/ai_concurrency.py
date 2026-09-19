@@ -26,18 +26,32 @@ async def user_concurrency_guard(user_id: str):
 
 
 async def dedup_call(key: Hashable, coro_factory: Callable[[], Awaitable[Any]]) -> Any:
-    """Runs coro_factory() once per key; concurrent calls with the same key await its result."""
+    """Runs coro_factory() once per key; concurrent calls with the same key share its result.
+
+    A waiter is shielded from the shared future so that cancelling one waiter's
+    own task never cancels the future other waiters (or the producer) depend on.
+    If the producer itself is cancelled, the future is cancelled too, so waiters
+    are woken with CancelledError instead of hanging forever.
+    """
     existing = _pending_calls.get(key)
     if existing is not None:
-        return await existing
+        return await asyncio.shield(existing)
 
     future = asyncio.get_running_loop().create_future()
     _pending_calls[key] = future
     try:
         result = await coro_factory()
-        future.set_result(result)
+    except asyncio.CancelledError:
+        if not future.done():
+            future.cancel()
+        raise
     except Exception as exc:
-        future.set_exception(exc)
+        if not future.done():
+            future.set_exception(exc)
+        raise
+    else:
+        if not future.done():
+            future.set_result(result)
+        return result
     finally:
         _pending_calls.pop(key, None)
-    return await future
